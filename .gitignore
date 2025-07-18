@@ -1,0 +1,49 @@
+# Node
+node_modules
+.next
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env*.local
+
+# npm package manager cache
+.npm/
+
+# Docker
+.dockerignore
+
+# Build outputs
+dist/
+build/
+out/
+
+# Next.js specific
+next-env.d.ts
+
+# Log files
+*.log
+logs/
+
+# Temp files
+*.tmp
+*.bak
+*.swp
+
+# VS Code
+.vscode/
+
+# macOS specific
+.DS_Store
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Dependencies installed by npm ci or npm install in Docker
+/app/node_modules
