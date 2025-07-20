@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
-  output: "standalone", // เพิ่มบรรทัดนี้เข้ามา
-  reactStrictMode: true, // บรรทัดนี้อาจมีอยู่แล้วหรือไม่ก็ได้ ขึ้นอยู่กับตอนสร้างโปรเจกต์
-  assetPrefix: "/", // added
+  reactStrictMode: true,
+  ...(isProd && {
+    output: "standalone",
+    assetPrefix: "/",
+  }),
 };
 
 export default nextConfig;

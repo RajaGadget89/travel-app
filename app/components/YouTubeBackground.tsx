@@ -9,31 +9,22 @@ export default function YouTubeBackground({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  // Ensure client-side rendering
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (iframeRef.current && !isLoaded && !hasError) {
-        console.log("Development: Timeout reached - forcing iframe visibility");
         setIsLoaded(true);
       }
-    }, 5000); // Extended to 5 seconds
+    }, 5000);
 
     return () => clearTimeout(timeoutId);
   }, [isLoaded, hasError]);
 
   const handleLoad = () => {
-    console.log("Development: iframe onLoad fired");
     setIsLoaded(true);
   };
 
   const handleError = () => {
-    console.log("Development: iframe onError fired");
     setHasError(true);
   };
 
@@ -55,15 +46,6 @@ export default function YouTubeBackground({
 
   return (
     <div className="absolute inset-0 w-full h-full">
-      {/* Debug border for container in development - only show on client */}
-      {isClient && (
-        <div className="absolute inset-0 border-4 border-green-500 z-50 pointer-events-none">
-          <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 text-xs">
-            YouTubeBackground Container
-          </div>
-        </div>
-      )}
-      
       {/* Fallback background - always beneath iframe */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 z-0" />
       
@@ -72,7 +54,7 @@ export default function YouTubeBackground({
         ref={iframeRef}
         className={`absolute inset-0 w-full h-full transition-opacity duration-1000 pointer-events-none z-10 ${
           isLoaded ? "opacity-100" : "opacity-0"
-        } ${isClient ? "border-2 border-red-500" : ""}`}
+        }`}
         src={videoUrl}
         title="Hero Video"
         allow="autoplay; encrypted-media"
@@ -81,15 +63,6 @@ export default function YouTubeBackground({
         onError={handleError}
       />
       
-      {/* Debug overlay to show iframe position in development - only show on client */}
-      {isClient && (
-        <div className="absolute inset-0 border-2 border-yellow-500 z-15 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-yellow-500 text-black px-2 py-1 text-xs font-bold">
-            IFRAME POSITION (z-10)
-          </div>
-        </div>
-      )}
-      
       {/* Loading indicator */}
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 flex items-center justify-center z-20">
@@ -97,7 +70,7 @@ export default function YouTubeBackground({
         </div>
       )}
       
-      {/* Dark overlay for better text readability - FIXED: now below iframe */}
+      {/* Dark overlay for better text readability */}
       <div className="absolute inset-0 bg-black bg-opacity-30 z-5" />
     </div>
   );

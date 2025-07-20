@@ -1,16 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import YouTubeBackground from "./YouTubeBackground";
 
 export default function HeroSection() {
-  const [isClient, setIsClient] = useState(false);
-
-  // Ensure client-side rendering
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   // Scroll handler for the CTA button
   const handleScroll = () => {
     const target = document.getElementById("travel-packages");
@@ -21,15 +13,6 @@ export default function HeroSection() {
 
   return (
     <section className="relative w-full h-screen flex items-center justify-center overflow-hidden">
-      {/* Debug border for HeroSection in development - only show on client */}
-      {isClient && (
-        <div className="absolute inset-0 border-4 border-blue-500 z-40 pointer-events-none">
-          <div className="absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 text-xs">
-            HeroSection Container
-          </div>
-        </div>
-      )}
-      
       {/* Video background - full viewport coverage */}
       <YouTubeBackground videoUrl="https://www.youtube.com/embed/g56DdJ5YFBU?autoplay=1&mute=1&controls=0&loop=1&playlist=g56DdJ5YFBU&modestbranding=1&showinfo=0&rel=0&enablejsapi=1&playsinline=1" />
       

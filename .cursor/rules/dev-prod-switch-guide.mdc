@@ -1,0 +1,40 @@
+---
+alwaysApply: true
+---
+
+# Rule: Switch Between Dev and Prod Mode with Docker in Next.js
+
+## Intent
+Ensure safe switching between development and production environments in Next.js projects using Docker.
+
+## When to Apply
+- Switching from dev to prod or vice versa.
+- When modifying Dockerfiles or docker-compose files.
+- When adjusting next.config.ts for output behavior.
+
+## Best Practices
+
+### 1. Never let AI run `npm install` directly
+Avoid dependency corruption. Let human maintain package consistency.
+
+**Instead, do:**
+```sh
+npm install
+# Rule: Switch Between Dev and Prod Mode with Docker in Next.js
+
+## Intent
+Ensure safe switching between development and production environments in Next.js projects using Docker.
+
+## When to Apply
+- Switching from dev to prod or vice versa.
+- When modifying Dockerfiles or docker-compose files.
+- When adjusting next.config.ts for output behavior.
+
+## Best Practices
+
+### 1. Never let AI run `npm install` directly
+Avoid dependency corruption. Let human maintain package consistency.
+
+**Instead, do:**
+```sh
+npm install
