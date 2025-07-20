@@ -33,7 +33,7 @@ export default function TopMenuBar() {
           <ul className={`hidden md:flex space-x-8 font-semibold text-lg transition-colors duration-300 ${scrolled ? "text-black" : "text-white"}`}>
             <li><a href="#see-do" className="hover:text-blue-700">SEE & DO</a></li>
             <li><a href="#plan-stay" className="hover:text-blue-700">PLAN YOUR STAY</a></li>
-            <li><a href="#whats-on" className="hover:text-blue-700">WHAT'S ON</a></li>
+            <li><a href="#whats-on" className="hover:text-blue-700">SharePoint</a></li>
             <li><a href="#about" className="hover:text-blue-700">ABOUT</a></li>
           </ul>
           <div className={`flex items-center space-x-4 text-xl transition-colors duration-300 ${scrolled ? "text-black" : "text-white"}`}>

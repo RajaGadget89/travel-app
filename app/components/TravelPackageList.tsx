@@ -91,7 +91,7 @@ export default function TravelPackageList() {
 
         {/* Package Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {packages.map((pkg, index) => (
+          {packages.map((pkg) => (
             <Link 
               href={`/package/${pkg.id}`} 
               key={pkg.id}

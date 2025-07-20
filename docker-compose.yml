@@ -1,45 +1,14 @@
-version: '3.8' # Docker Compose version (optional for newer Docker Compose CLI)
-
 services:
-  # The main service for your Next.js web application
   webapp:
-    # Tell Docker Compose to build the image from the Dockerfile in the current directory
-    # Docker Compose will build all stages in the Dockerfile.
     build:
       context: .
       dockerfile: Dockerfile
-
-    # Assign a specific name to your container for easy identification
-    container_name: travel-app-container # เปลี่ยนชื่อให้สอดคล้องกับโปรเจกต์ของคุณ
-
-    # Port Mapping: "HOST_PORT:CONTAINER_PORT"
-    # This maps port 8080 on your local machine (Host) to port 3000 inside the container.
-    # Next.js Development Server usually runs on port 3000.
+      target: final_production
+    container_name: travel-app-container
     ports:
-      - "8080:3000"
-
-    # Volume mounting for seamless development (Hot Module Replacement / Hot Reloading)
-    volumes:
-      # Mounts your local source code directory into the /app directory inside the container.
-      # Any changes you make to your code on your local machine will instantly reflect in the container.
-      - .:/app
-      # Explicitly exclude the node_modules folder from the host to prevent conflicts.
-      # The container installs its own node_modules (specific to ARM architecture).
-      - /app/node_modules
-
-    # Set environment variables for the application inside the container
+      - "8081:3000"
     environment:
-      # Set NODE_ENV to 'development' to enable Next.js Development Server features like HMR
-      NODE_ENV: development
-      # Crucial: Tell Next.js Development Server to listen on all network interfaces (0.0.0.0)
-      # This allows external connections (from your host browser) to reach the server.
-      HOSTNAME: 0.0.0.0
-      # Explicitly set the port for Next.js Development Server to listen on inside the container
-      PORT: 3000
-
-    # The command to execute when the container starts for development mode
-    # This runs the Next.js development server
-    command: npm run dev
-
-    # Automatically restart the container if it exits due to an error, or when Docker service starts
+      - NODE_ENV=production
+      - PORT=3000
+    command: node server.js
     restart: always

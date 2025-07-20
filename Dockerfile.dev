@@ -1,0 +1,20 @@
+# Dockerfile.dev (สำหรับ Development)
+FROM node:20-alpine
+
+# ติดตั้งเครื่องมือสำหรับ build native modules
+RUN apk add --no-cache \
+  build-base \
+  python3 \
+  git
+
+WORKDIR /app
+
+# ใช้ volume mount แทนการ copy โค้ด
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# ตั้งค่าพอร์ต
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]
+
