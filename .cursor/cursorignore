@@ -71,3 +71,24 @@ coverage.xml
 # Framework specific (uncomment as needed)
 # .cursor/rules/archive/
 # memory-bank/backups/
+
+
+# ───── Cursor-specific control ─────
+.cursorignore
+memory-bank/
+memory-bank/backups/
+
+# ───── Docker-specific files ─────
+Dockerfile
+Dockerfile.dev
+.dockerignore
+docker-compose.yml
+docker-compose.dev.yml
+
+# ───── Project-specific overrides ─────
+# ห้าม Cursor แก้ไข Docker, Env, หรือ Build System โดยตรง
+.env
+.env.local
+.env.*.local
+reset-dev.sh
+travel-app-backup_*.zip
