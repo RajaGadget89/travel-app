@@ -3,14 +3,16 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 
-interface TripDetailPageProps {
-  params: {
+interface PageProps {
+  params: Promise<{
     tripId: string;
-  };
+  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default function TripDetailPage({ params }: TripDetailPageProps) {
-  const trip = trips.find(t => t.id === params.tripId);
+export default async function TripDetailPage({ params }: PageProps) {
+  const { tripId } = await params;
+  const trip = trips.find(t => t.id === tripId);
   
   if (!trip) {
     notFound();
@@ -21,8 +23,6 @@ export default function TripDetailPage({ params }: TripDetailPageProps) {
   
   // Format duration
   const duration = trip.days === 1 ? '1 Day' : `${trip.days} Days`;
-  
-
 
   return (
     <main className="min-h-screen bg-gray-50">
