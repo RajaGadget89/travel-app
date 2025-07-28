@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { trips } from '../../../../src/data/trips';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 
 interface PageProps {
@@ -44,7 +43,7 @@ export default function BookingFormPage({ params }: PageProps) {
   const [tripId, setTripId] = useState<string>('');
 
   // Get trip data
-  const getTripData = async () => {
+  const getTripData = useCallback(async () => {
     const { tripId: id } = await params;
     setTripId(id);
     const trip = trips.find(t => t.id === id);
@@ -57,7 +56,7 @@ export default function BookingFormPage({ params }: PageProps) {
     setFormData(prev => ({ ...prev, tripName: trip.title }));
     
     return trip;
-  };
+  }, [params]);
 
   // Validate form fields
   const validateForm = (): boolean => {
@@ -174,7 +173,7 @@ export default function BookingFormPage({ params }: PageProps) {
   // Load trip data when component mounts
   useEffect(() => {
     getTripData();
-  }, []);
+  }, [getTripData]);
 
   return (
     <main className="min-h-screen bg-gray-50 py-8">
