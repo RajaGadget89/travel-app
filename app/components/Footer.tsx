@@ -16,6 +16,7 @@ export default function Footer() {
                   alt="หอการค้า จังหวัดสงขลา"
                   fill
                   className="object-contain"
+                  sizes="(max-width: 768px) 40px, 48px"
                 />
               </div>
               <span className="text-black font-medium text-base md:text-lg">

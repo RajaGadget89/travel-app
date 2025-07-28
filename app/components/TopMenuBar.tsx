@@ -23,14 +23,15 @@ export default function TopMenuBar() {
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 py-2 md:py-3">
         {/* Left: Logo and Organization Names */}
         <div className="flex items-center space-x-2 md:space-x-3 mr-auto">
-          <Image 
-            src="/images/logo.png" 
-            alt="Songkhla Chamber of Commerce Logo" 
-            width={48} 
-            height={48} 
-            className="rounded-full w-10 h-10 md:w-16 md:h-16"
-            style={{ height: "auto" }}
-          />
+          <div className="relative w-10 h-10 md:w-16 md:h-16">
+            <Image 
+              src="/images/logo.png" 
+              alt="Songkhla Chamber of Commerce Logo" 
+              fill
+              className="rounded-full object-contain"
+              sizes="(max-width: 768px) 40px, 64px"
+            />
+          </div>
           <div className="flex flex-col leading-tight">
             <span className="font-bold text-sm md:text-2xl text-blue-900">Songkhla Chamber of Commerce</span>
             <span className={`text-xs md:text-lg transition-colors duration-300 ${scrolled ? "text-gray-700" : "text-gray-300"}`}>หอการค้า จังหวัดสงขลา</span>
