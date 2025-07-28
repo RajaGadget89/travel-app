@@ -18,6 +18,17 @@ A modern travel booking website built with Next.js, TailwindCSS, and TypeScript.
 - [Node.js](https://nodejs.org/) (if running locally without Docker)
 - [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) (for external access)
 
+### Environment Variables
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# Google Sheets Webhook Configuration
+GOOGLE_SHEET_WEBHOOK_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
+GOOGLE_SHEET_TOKEN=your_security_token_here
+```
+
+**Note:** The `.env.local` file is already included in `.gitignore` to keep your credentials secure.
+
 ### Local Development
 ```sh
 docker-compose up --build

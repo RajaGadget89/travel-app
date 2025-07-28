@@ -7,8 +7,8 @@ The primary purpose of this travel app is to serve as a website for booking or s
 Individuals looking to book travel trips, with an emphasis on a user-friendly and visually appealing experience.
 
 ## Must-Have Features
-- Landing Page: Top menu, full-screen video hero, call-to-action, card section for trips
-- Trip Detail Page: Trip info, booking option, navigation to main/booking form
+- Landing Page: Top menu, full-screen video hero, call-to-action with smooth scroll, dynamic trip cards grouped by category
+- Trip Detail Page: Trip info, booking option, navigation to main/booking form (✅ Implemented)
 - Booking Form: Multi-step, collects user info, uploads payment slip, confirmation
 - Data Storage: Save bookings to Google Sheet (initially), with future DB integration
 
