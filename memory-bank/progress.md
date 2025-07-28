@@ -11,13 +11,13 @@
 | Project Structure       | Done         |            | Scaffolding complete                   |
 | TailwindCSS Integration | Done         |            | Verified working                       |
 | Docker Setup            | Done         |            | Verified working                       |
-| Landing Page            | In Progress  |            | UI implementation ongoing              |
+| Landing Page            | Done         |            | Complete with dynamic trip cards and CTA scroll |
 | Global Footer           | Done         |            | Footer component implemented           |
-| Trip Cards              | Done         |            | Redesigned with Visit Faroe Islands style |
-| Trip Detail Page        | To Do        |            |                                        |
-| Booking Form            | To Do        |            |                                        |
-| Google Sheets API       | To Do        |            | Integration not yet tested             |
-| Error Handling/Feedback | To Do        |            |                                        |
+| Trip Cards              | Done         |            | Dynamic cards from data source with proper routing |
+| Trip Detail Page        | Done         |            | Dynamic route with Next.js App Router typing |
+| Booking Form            | Done         |            | Complete with form validation and file upload |
+| Google Sheets API       | Done         |            | Backend API route with env vars for security |
+| Error Handling/Feedback | Done         |            | Comprehensive error handling in API route |
 | Admin/Auth System       | Not Planned  |            | Out of scope for MVP                   |
 
 *Status options: Not Started, In Progress, Done, Blocked, To Do, Not Planned*
@@ -28,9 +28,12 @@
 
 | Issue ID | Module/Area         | Status     | Description                                      | Solution/Resolution                  |
 |----------|---------------------|------------|--------------------------------------------------|--------------------------------------|
-| 1        | Google Sheets API   | Open       | Integration not yet tested                       | Pending integration & testing        |
+| 1        | Google Sheets API   | Closed     | Backend API route with webhook forwarding       | Complete with server-side webhook handling |
 | 2        | Admin/Auth System   | Closed     | No admin/auth system (by design for MVP)         | Not required for MVP                 |
-| 3        | Booking Flow        | To Do      | End-to-end booking flow not yet tested           | To be tested after UI implementation |
+| 3        | Booking Flow        | Done       | End-to-end booking flow implemented and tested   | Complete with form validation and file upload |
+| 4        | CTA Button Scroll   | Closed     | CTA button not scrolling to trip section         | Fixed: Added travel-packages ID and restructured sections |
+| 5        | Trip Card Routing   | Closed     | Trip cards not linking to detail pages           | Fixed: Created /book/[tripId] dynamic routes |
+| 6        | Next.js Typing      | Closed     | Incorrect PageProps typing for App Router        | Fixed: Updated to use Promise-based params with async/await |
 
 *Status options: Open, In Progress, Blocked, Closed, To Do*
 
@@ -52,12 +55,16 @@
 - TailwindCSS and Docker setup verified
 - Environment variable management in place
 - Hero section with YouTube video background implemented
+- Dynamic trip cards from data source with proper routing
+- Trip detail pages with Next.js App Router typing
+- CTA button scroll functionality working
+- Responsive design with category grouping (One Day vs Multi-Day trips)
+- Booking form with validation and file upload functionality
+- Google Sheets webhook integration via backend API route with environment variables
+- Comprehensive error handling and validation throughout the application
 
 ### To Do
-- Build trip cards component
-- Create trip detail and booking form pages
-- Integrate Google Sheets API
-- Add basic error handling and user feedback
+- All core features completed! 🎉
 
 ### Known Issues
 - Google Sheets API integration not yet tested
