@@ -176,17 +176,17 @@ export default function BookingFormPage({ params }: PageProps) {
   }, [getTripData]);
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8">
+    <main className="min-h-screen bg-gray-50 py-6 md:py-8">
       <div className="max-w-2xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Book Your Trip</h1>
-          <p className="text-gray-600">Complete the form below to register for your selected trip</p>
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Book Your Trip</h1>
+          <p className="text-gray-600 text-sm md:text-base">Complete the form below to register for your selected trip</p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
+          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
             {/* Trip Name (Readonly) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -196,7 +196,7 @@ export default function BookingFormPage({ params }: PageProps) {
                 type="text"
                 value={formData.tripName}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700"
+                className="w-full px-3 py-3 md:py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 text-sm md:text-base"
               />
             </div>
 
@@ -215,7 +215,7 @@ export default function BookingFormPage({ params }: PageProps) {
                     setErrors(prev => ({ ...prev, fullName: undefined }));
                   }
                 }}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
                   errors.fullName ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Enter your full name"
@@ -240,7 +240,7 @@ export default function BookingFormPage({ params }: PageProps) {
                     setErrors(prev => ({ ...prev, phone: undefined }));
                   }
                 }}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
                   errors.phone ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Enter your phone number"
@@ -265,7 +265,7 @@ export default function BookingFormPage({ params }: PageProps) {
                     setErrors(prev => ({ ...prev, email: undefined }));
                   }
                 }}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
                   errors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Enter your email address"
@@ -280,10 +280,10 @@ export default function BookingFormPage({ params }: PageProps) {
               <label htmlFor="paymentProof" className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Proof of Payment <span className="text-red-500">*</span>
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+              <div className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
                 <div className="space-y-1 text-center">
                   <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
+                    className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-400"
                     stroke="currentColor"
                     fill="none"
                     viewBox="0 0 48 48"
@@ -296,10 +296,10 @@ export default function BookingFormPage({ params }: PageProps) {
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <div className="flex text-sm text-gray-600">
+                  <div className="flex flex-col sm:flex-row text-sm text-gray-600">
                     <label
                       htmlFor="paymentProof"
-                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1"
                     >
                       <span>Upload a file</span>
                       <input
@@ -311,7 +311,7 @@ export default function BookingFormPage({ params }: PageProps) {
                         onChange={handleFileChange}
                       />
                     </label>
-                    <p className="pl-1">or drag and drop</p>
+                    <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                 </div>
@@ -342,17 +342,17 @@ export default function BookingFormPage({ params }: PageProps) {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base min-h-[44px]"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Booking'}
               </button>
                              <Link
                  href={`/book/${tripId}`}
-                 className="flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-300 text-center"
+                 className="flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-300 text-center text-sm md:text-base min-h-[44px] flex items-center justify-center"
                >
                  Back to Trip
                </Link>
