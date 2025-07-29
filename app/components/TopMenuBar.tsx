@@ -62,7 +62,6 @@ export default function TopMenuBar() {
           <ul className={`flex space-x-8 font-semibold text-lg transition-colors duration-300 ${scrolled ? "text-black" : "text-white"}`}>
             <li><a href="#see-do" className="hover:text-blue-700">SEE & DO</a></li>
             <li><a href="#plan-stay" className="hover:text-blue-700">PLAN YOUR STAY</a></li>
-            <li><a href="#whats-on" className="hover:text-blue-700">SharePoint</a></li>
             <li><a href="#about" className="hover:text-blue-700">ABOUT</a></li>
           </ul>
           <div className={`flex items-center space-x-4 text-xl transition-colors duration-300 ${scrolled ? "text-black" : "text-white"}`}>
@@ -80,7 +79,6 @@ export default function TopMenuBar() {
             <ul className="space-y-4 font-semibold text-lg text-black">
               <li><a href="#see-do" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>SEE & DO</a></li>
               <li><a href="#plan-stay" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>PLAN YOUR STAY</a></li>
-              <li><a href="#whats-on" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>SharePoint</a></li>
               <li><a href="#about" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>ABOUT</a></li>
             </ul>
             <div className="flex items-center space-x-6 text-xl text-black pt-4 border-t border-gray-200">
