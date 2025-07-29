@@ -89,6 +89,38 @@ export default async function TripDetailPage({ params }: PageProps) {
             </p>
           </div>
 
+          {/* Timeline Section */}
+          {trip.timeline && trip.timeline.length > 0 && (
+            <div className="mb-6 md:mb-8">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">Itinerary</h2>
+              <div className="space-y-3 md:space-y-4">
+                {trip.timeline.map((item, index) => (
+                  <div key={index} className="flex items-start space-x-3 md:space-x-4">
+                    {/* Timeline dot and line */}
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 md:w-4 md:h-4 bg-blue-600 rounded-full flex-shrink-0 mt-1 md:mt-2"></div>
+                      {index < trip.timeline!.length - 1 && (
+                        <div className="w-0.5 h-8 md:h-12 bg-gray-300 mt-1 md:mt-2"></div>
+                      )}
+                    </div>
+                    
+                    {/* Timeline content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="bg-gray-50 rounded-lg p-3 md:p-4">
+                        <div className="font-semibold text-blue-600 text-sm md:text-base mb-1">
+                          {item.time}
+                        </div>
+                        <div className="text-gray-700 text-sm md:text-base">
+                          {item.activity}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <Link 
