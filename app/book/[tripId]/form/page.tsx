@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { trips } from '../../../../src/data/trips';
+import { tripFormSchema } from '../../../../src/data/tripForms';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
@@ -12,96 +13,115 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+interface FormField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+}
+
 interface FormData {
-  fullName: string;
-  phone: string;
-  email: string;
-  tripName: string;
-  paymentProof: File | null;
+  [key: string]: string | File | null;
 }
 
 interface FormErrors {
-  fullName?: string;
-  phone?: string;
-  email?: string;
-  paymentProof?: string;
+  [key: string]: string;
 }
 
 export default function BookingFormPage({ params }: PageProps) {
-  const [formData, setFormData] = useState<FormData>({
-    fullName: '',
-    phone: '',
-    email: '',
-    tripName: '',
-    paymentProof: null,
-  });
-  
+  const [formData, setFormData] = useState<FormData>({});
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
   const [tripId, setTripId] = useState<string>('');
+  const [formSchema, setFormSchema] = useState<FormField[]>([]);
+  const [trip, setTrip] = useState<any>(null);
 
-  // Get trip data
+  // Get trip data and form schema
   const getTripData = useCallback(async () => {
     const { tripId: id } = await params;
     setTripId(id);
-    const trip = trips.find(t => t.id === id);
     
-    if (!trip) {
+    const tripData = trips.find(t => t.id === id);
+    if (!tripData) {
       notFound();
     }
+    setTrip(tripData);
 
-    // Set trip name in form data
-    setFormData(prev => ({ ...prev, tripName: trip.title }));
-    
-    return trip;
+    // Get form schema for this trip
+    const schema = tripFormSchema[id as keyof typeof tripFormSchema];
+    if (!schema) {
+      notFound();
+    }
+    setFormSchema(schema);
+
+    // Initialize form data with empty values
+    const initialFormData: FormData = {};
+    schema.forEach(field => {
+      initialFormData[field.name] = '';
+    });
+    setFormData(initialFormData);
   }, [params]);
 
   // Validate form fields
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
-    }
+    formSchema.forEach(field => {
+      const value = formData[field.name];
+      
+      if (field.required) {
+        if (!value || (typeof value === 'string' && !value.trim())) {
+          newErrors[field.name] = `${field.label} is required`;
+        }
+      }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^[0-9+\-\s()]+$/.test(formData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number';
-    }
-
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    if (!formData.paymentProof) {
-      newErrors.paymentProof = 'Payment proof is required';
-    }
+      // Additional validation for specific field types
+      if (field.type === 'file' && field.required && !value) {
+        newErrors[field.name] = `${field.label} is required`;
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle input change
+  const handleInputChange = (fieldName: string, value: string) => {
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
+  };
+
   // Handle file upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = (fieldName: string, file: File | null) => {
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({ ...prev, paymentProof: 'Please upload an image file' }));
+      // Validate file type for image files
+      if (fieldName === 'paymentProof' && !file.type.startsWith('image/')) {
+        setErrors(prev => ({ ...prev, [fieldName]: 'Please upload an image file' }));
         return;
       }
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, paymentProof: 'File size must be less than 5MB' }));
+        setErrors(prev => ({ ...prev, [fieldName]: 'File size must be less than 5MB' }));
         return;
       }
+    }
 
-      setFormData(prev => ({ ...prev, paymentProof: file }));
-      setErrors(prev => ({ ...prev, paymentProof: undefined }));
+    setFormData(prev => ({ ...prev, [fieldName]: file }));
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
     }
   };
 
@@ -117,27 +137,41 @@ export default function BookingFormPage({ params }: PageProps) {
     setSubmitStatus('idle');
 
     try {
-      // Convert image to base64
-      const base64Image = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(formData.paymentProof!);
-      });
+      // Convert image to base64 if paymentProof exists
+      let imageBase64 = '';
+      if (formData.paymentProof && formData.paymentProof instanceof File) {
+        imageBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(formData.paymentProof as File);
+        });
+      }
 
-      // Send to our API route which will forward to Google Apps Script webhook
+      // Prepare form data for submission
+      const submissionData: any = {
+        tripId: tripId,
+        tripName: trip.title,
+        ...formData
+      };
+
+      // Remove File objects and add base64 image
+      Object.keys(submissionData).forEach(key => {
+        if (submissionData[key] instanceof File) {
+          delete submissionData[key];
+        }
+      });
+      
+      if (imageBase64) {
+        submissionData.imageBase64 = imageBase64;
+      }
+
+      // Send to API route
       const response = await fetch('/api/submit-booking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          phone: formData.phone,
-          email: formData.email || '',
-          tripId: tripId,
-          tripName: formData.tripName,
-          imageBase64: base64Image,
-        }),
+        body: JSON.stringify(submissionData),
       });
 
       if (response.ok) {
@@ -146,14 +180,13 @@ export default function BookingFormPage({ params }: PageProps) {
         if (responseData.success) {
           setSubmitStatus('success');
           setSubmitMessage(responseData.message || 'Booking submitted successfully! We will contact you soon.');
+          
           // Reset form
-          setFormData({
-            fullName: '',
-            phone: '',
-            email: '',
-            tripName: formData.tripName,
-            paymentProof: null,
+          const resetFormData: FormData = {};
+          formSchema.forEach(field => {
+            resetFormData[field.name] = '';
           });
+          setFormData(resetFormData);
         } else {
           throw new Error(responseData.message || 'Failed to submit booking');
         }
@@ -170,10 +203,109 @@ export default function BookingFormPage({ params }: PageProps) {
     }
   };
 
+  // Render form field based on type
+  const renderField = (field: FormField) => {
+    const value = formData[field.name];
+    const error = errors[field.name];
+
+    switch (field.type) {
+      case 'textarea':
+        return (
+          <textarea
+            id={field.name}
+            name={field.name}
+            value={typeof value === 'string' ? value : ''}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            aria-required={field.required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${field.name}-error` : undefined}
+            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base resize-vertical min-h-[100px] ${
+              error ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder={`Enter ${field.label.toLowerCase()}`}
+          />
+        );
+
+      case 'file':
+        return (
+          <div 
+            className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors"
+            role="group"
+            aria-labelledby={field.name}
+          >
+            <div className="space-y-1 text-center">
+              <svg
+                className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-400"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+              >
+                <path
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div className="flex flex-col sm:flex-row text-sm text-gray-600">
+                <span className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
+                  Upload a file
+                </span>
+                <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>
+              </div>
+              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+            </div>
+            <input
+              id={field.name}
+              name={field.name}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => handleFileChange(field.name, e.target.files?.[0] || null)}
+              aria-required={field.required}
+              aria-invalid={!!error}
+              aria-describedby={error ? `${field.name}-error` : undefined}
+            />
+          </div>
+        );
+
+      default:
+        return (
+          <input
+            type={field.type}
+            id={field.name}
+            name={field.name}
+            value={typeof value === 'string' ? value : ''}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            aria-required={field.required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${field.name}-error` : undefined}
+            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
+              error ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder={`Enter ${field.label.toLowerCase()}`}
+          />
+        );
+    }
+  };
+
   // Load trip data when component mounts
   useEffect(() => {
     getTripData();
   }, [getTripData]);
+
+  if (!trip || formSchema.length === 0) {
+    return (
+      <main className="min-h-screen bg-gray-50 py-6 md:py-8">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="text-center">
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 py-6 md:py-8">
@@ -196,164 +328,34 @@ export default function BookingFormPage({ params }: PageProps) {
                 type="text"
                 id="tripName"
                 name="tripName"
-                value={formData.tripName}
+                value={trip.title}
                 readOnly
                 aria-readonly="true"
                 className="w-full px-3 py-3 md:py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 text-sm md:text-base"
               />
             </div>
 
-            {/* Full Name */}
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500" aria-label="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, fullName: e.target.value }));
-                  if (errors.fullName) {
-                    setErrors(prev => ({ ...prev, fullName: undefined }));
-                  }
-                }}
-                aria-required="true"
-                aria-invalid={!!errors.fullName}
-                aria-describedby={errors.fullName ? 'fullName-error' : undefined}
-                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
-                  errors.fullName ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your full name"
-              />
-              {errors.fullName && (
-                <p id="fullName-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                  {errors.fullName}
-                </p>
-              )}
-            </div>
-
-            {/* Phone Number */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number <span className="text-red-500" aria-label="required">*</span>
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, phone: e.target.value }));
-                  if (errors.phone) {
-                    setErrors(prev => ({ ...prev, phone: undefined }));
-                  }
-                }}
-                aria-required="true"
-                aria-invalid={!!errors.phone}
-                aria-describedby={errors.phone ? 'phone-error' : undefined}
-                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
-                  errors.phone ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your phone number"
-              />
-              {errors.phone && (
-                <p id="phone-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                  {errors.phone}
-                </p>
-              )}
-            </div>
-
-            {/* Email Address */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address <span className="text-gray-500 text-xs">(Optional)</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, email: e.target.value }));
-                  if (errors.email) {
-                    setErrors(prev => ({ ...prev, email: undefined }));
-                  }
-                }}
-                aria-required="false"
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? 'email-error' : undefined}
-                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your email address"
-              />
-              {errors.email && (
-                <p id="email-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            {/* Payment Proof Upload */}
-            <div>
-              <label htmlFor="paymentProof" className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Proof of Payment <span className="text-red-500" aria-label="required">*</span>
-              </label>
-              <div 
-                className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors"
-                role="group"
-                aria-labelledby="paymentProof"
-              >
-                <div className="space-y-1 text-center">
-                  <svg
-                    className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-400"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="flex flex-col sm:flex-row text-sm text-gray-600">
-                    <span className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
-                      Upload a file
-                    </span>
-                    <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-                </div>
-                <input
-                  id="paymentProof"
-                  name="paymentProof"
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={handleFileChange}
-                  aria-required="true"
-                  aria-invalid={!!errors.paymentProof}
-                  aria-describedby={errors.paymentProof ? 'paymentProof-error' : undefined}
-                />
-              </div>
-              {formData.paymentProof && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600" aria-live="polite">
-                    Selected file: {formData.paymentProof.name}
+            {/* Dynamic Form Fields */}
+            {formSchema.map((field) => (
+              <div key={field.name}>
+                <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-2">
+                  {field.label} {field.required && <span className="text-red-500" aria-label="required">*</span>}
+                </label>
+                {renderField(field)}
+                {errors[field.name] && (
+                  <p id={`${field.name}-error`} className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
+                    {errors[field.name]}
                   </p>
-                </div>
-              )}
-              {errors.paymentProof && (
-                <p id="paymentProof-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                  {errors.paymentProof}
-                </p>
-              )}
-            </div>
+                )}
+                {field.type === 'file' && formData[field.name] instanceof File && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600" aria-live="polite">
+                      Selected file: {(formData[field.name] as File).name}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
 
             {/* Submit Status Messages */}
             {submitStatus === 'success' && (
