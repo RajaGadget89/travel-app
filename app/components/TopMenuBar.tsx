@@ -20,7 +20,7 @@ export default function TopMenuBar() {
         scrolled ? "bg-white shadow-md" : "bg-transparent"
       }`}
     >
-      <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 py-2 md:py-3">
+      <nav className="relative max-w-7xl mx-auto flex items-center justify-between px-4 py-2 md:py-3">
         {/* Left: Logo and Organization Names */}
         <div className="flex items-center space-x-2 md:space-x-3 mr-auto">
           <div className="relative w-10 h-10 md:w-16 md:h-16">
@@ -32,7 +32,11 @@ export default function TopMenuBar() {
               sizes="(max-width: 768px) 40px, 64px"
             />
           </div>
-          <div className="flex flex-col leading-tight">
+          <div className={`flex flex-col leading-tight z-10 md:z-auto transition-all duration-300 ${
+            !scrolled 
+              ? "translate-y-[-100px] pointer-events-none md:translate-y-0 md:pointer-events-auto" 
+              : "translate-y-0 pointer-events-auto"
+          }`}>
             <span className="font-bold text-sm md:text-2xl text-blue-900">Songkhla Chamber of Commerce</span>
             <span className={`text-xs md:text-lg transition-colors duration-300 ${scrolled ? "text-gray-700" : "text-gray-300"}`}>หอการค้า จังหวัดสงขลา</span>
           </div>
@@ -58,7 +62,6 @@ export default function TopMenuBar() {
           <ul className={`flex space-x-8 font-semibold text-lg transition-colors duration-300 ${scrolled ? "text-black" : "text-white"}`}>
             <li><a href="#see-do" className="hover:text-blue-700">SEE & DO</a></li>
             <li><a href="#plan-stay" className="hover:text-blue-700">PLAN YOUR STAY</a></li>
-            <li><a href="#whats-on" className="hover:text-blue-700">SharePoint</a></li>
             <li><a href="#about" className="hover:text-blue-700">ABOUT</a></li>
           </ul>
           <div className={`flex items-center space-x-4 text-xl transition-colors duration-300 ${scrolled ? "text-black" : "text-white"}`}>
@@ -76,7 +79,6 @@ export default function TopMenuBar() {
             <ul className="space-y-4 font-semibold text-lg text-black">
               <li><a href="#see-do" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>SEE & DO</a></li>
               <li><a href="#plan-stay" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>PLAN YOUR STAY</a></li>
-              <li><a href="#whats-on" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>SharePoint</a></li>
               <li><a href="#about" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>ABOUT</a></li>
             </ul>
             <div className="flex items-center space-x-6 text-xl text-black pt-4 border-t border-gray-200">

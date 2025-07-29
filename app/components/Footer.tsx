@@ -1,7 +1,12 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function Footer() {
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
+
   return (
     <footer className="w-full">
       {/* Top Section - Light Grey Background */}
@@ -69,9 +74,13 @@ export default function Footer() {
             <div className="space-y-3">
               <h3 className="text-gray-500 text-sm font-normal">Language</h3>
               <div className="relative">
-                <select className="appearance-none bg-transparent border-b border-gray-300 text-black font-medium py-2 pr-8 focus:outline-none focus:border-blue-600 w-full">
-                  <option>English</option>
-                  <option>ไทย</option>
+                <select 
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="appearance-none bg-transparent border-b border-gray-300 text-black font-medium py-2 pr-8 focus:outline-none focus:border-blue-600 w-full"
+                >
+                  <option value="English">English</option>
+                  <option value="ไทย">ไทย</option>
                 </select>
                 <div className="absolute right-0 top-3 pointer-events-none">
                   <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
