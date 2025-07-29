@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <head>
         <title>หอการค้า จังหวัดสงขลา</title>
         <link rel="icon" href="/images/logo.png" type="image/png" />

@@ -28,6 +28,7 @@ export default function TopMenuBar() {
               src="/images/logo.png" 
               alt="Songkhla Chamber of Commerce Logo" 
               fill
+              loading="lazy"
               className="rounded-full object-contain"
               sizes="(max-width: 768px) 40px, 64px"
             />
