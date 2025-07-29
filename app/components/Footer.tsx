@@ -20,6 +20,7 @@ export default function Footer() {
                   src="/images/logo.png"
                   alt="หอการค้า จังหวัดสงขลา"
                   fill
+                  loading="lazy"
                   className="object-contain"
                   sizes="(max-width: 768px) 40px, 48px"
                 />
@@ -75,6 +76,8 @@ export default function Footer() {
               <h3 className="text-gray-500 text-sm font-normal">Language</h3>
               <div className="relative">
                 <select 
+                  id="language"
+                  name="language"
                   value={selectedLanguage}
                   onChange={(e) => setSelectedLanguage(e.target.value)}
                   className="appearance-none bg-transparent border-b border-gray-300 text-black font-medium py-2 pr-8 focus:outline-none focus:border-blue-600 w-full"

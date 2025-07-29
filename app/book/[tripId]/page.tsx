@@ -2,6 +2,7 @@ import { trips } from '../../../src/data/trips';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import TripTimeline from '../../components/TripTimeline';
 
 interface PageProps {
   params: Promise<{
@@ -34,6 +35,8 @@ export default async function TripDetailPage({ params }: PageProps) {
           fill
           className="object-cover"
           priority
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
           sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 100vw, 100vw"
         />
         <div className="absolute inset-0 bg-black/40"></div>
@@ -89,37 +92,8 @@ export default async function TripDetailPage({ params }: PageProps) {
             </p>
           </div>
 
-          {/* Timeline Section */}
-          {trip.timeline && trip.timeline.length > 0 && (
-            <div className="mb-6 md:mb-8">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">Itinerary</h2>
-              <div className="space-y-3 md:space-y-4">
-                {trip.timeline.map((item, index) => (
-                  <div key={index} className="flex items-start space-x-3 md:space-x-4">
-                    {/* Timeline dot and line */}
-                    <div className="flex flex-col items-center">
-                      <div className="w-3 h-3 md:w-4 md:h-4 bg-blue-600 rounded-full flex-shrink-0 mt-1 md:mt-2"></div>
-                      {index < trip.timeline!.length - 1 && (
-                        <div className="w-0.5 h-8 md:h-12 bg-gray-300 mt-1 md:mt-2"></div>
-                      )}
-                    </div>
-                    
-                    {/* Timeline content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="bg-gray-50 rounded-lg p-3 md:p-4">
-                        <div className="font-semibold text-blue-600 text-sm md:text-base mb-1">
-                          {item.time}
-                        </div>
-                        <div className="text-gray-700 text-sm md:text-base">
-                          {item.activity}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Trip Timeline */}
+          {trip.timeline && <TripTimeline timeline={trip.timeline} />}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4">

@@ -186,16 +186,19 @@ export default function BookingFormPage({ params }: PageProps) {
 
         {/* Form Card */}
         <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6" role="form" aria-label="Trip booking form">
             {/* Trip Name (Readonly) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="tripName" className="block text-sm font-medium text-gray-700 mb-2">
                 Selected Trip
               </label>
               <input
                 type="text"
+                id="tripName"
+                name="tripName"
                 value={formData.tripName}
                 readOnly
+                aria-readonly="true"
                 className="w-full px-3 py-3 md:py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 text-sm md:text-base"
               />
             </div>
@@ -203,11 +206,12 @@ export default function BookingFormPage({ params }: PageProps) {
             {/* Full Name */}
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
+                Full Name <span className="text-red-500" aria-label="required">*</span>
               </label>
               <input
                 type="text"
                 id="fullName"
+                name="fullName"
                 value={formData.fullName}
                 onChange={(e) => {
                   setFormData(prev => ({ ...prev, fullName: e.target.value }));
@@ -215,24 +219,30 @@ export default function BookingFormPage({ params }: PageProps) {
                     setErrors(prev => ({ ...prev, fullName: undefined }));
                   }
                 }}
+                aria-required="true"
+                aria-invalid={!!errors.fullName}
+                aria-describedby={errors.fullName ? 'fullName-error' : undefined}
                 className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
                   errors.fullName ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Enter your full name"
               />
               {errors.fullName && (
-                <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
+                <p id="fullName-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
+                  {errors.fullName}
+                </p>
               )}
             </div>
 
             {/* Phone Number */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number <span className="text-red-500">*</span>
+                Phone Number <span className="text-red-500" aria-label="required">*</span>
               </label>
               <input
                 type="tel"
                 id="phone"
+                name="phone"
                 value={formData.phone}
                 onChange={(e) => {
                   setFormData(prev => ({ ...prev, phone: e.target.value }));
@@ -240,24 +250,30 @@ export default function BookingFormPage({ params }: PageProps) {
                     setErrors(prev => ({ ...prev, phone: undefined }));
                   }
                 }}
+                aria-required="true"
+                aria-invalid={!!errors.phone}
+                aria-describedby={errors.phone ? 'phone-error' : undefined}
                 className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
                   errors.phone ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Enter your phone number"
               />
               {errors.phone && (
-                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                <p id="phone-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
+                  {errors.phone}
+                </p>
               )}
             </div>
 
             {/* Email Address */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address (Optional)
+                Email Address <span className="text-gray-500 text-xs">(Optional)</span>
               </label>
               <input
                 type="email"
                 id="email"
+                name="email"
                 value={formData.email}
                 onChange={(e) => {
                   setFormData(prev => ({ ...prev, email: e.target.value }));
@@ -265,22 +281,31 @@ export default function BookingFormPage({ params }: PageProps) {
                     setErrors(prev => ({ ...prev, email: undefined }));
                   }
                 }}
+                aria-required="false"
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? 'email-error' : undefined}
                 className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
                   errors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Enter your email address"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                <p id="email-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
+                  {errors.email}
+                </p>
               )}
             </div>
 
             {/* Payment Proof Upload */}
             <div>
               <label htmlFor="paymentProof" className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Proof of Payment <span className="text-red-500">*</span>
+                Upload Proof of Payment <span className="text-red-500" aria-label="required">*</span>
               </label>
-              <div className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+              <div 
+                className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors"
+                role="group"
+                aria-labelledby="paymentProof"
+              >
                 <div className="space-y-1 text-center">
                   <svg
                     className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-400"
@@ -297,46 +322,48 @@ export default function BookingFormPage({ params }: PageProps) {
                     />
                   </svg>
                   <div className="flex flex-col sm:flex-row text-sm text-gray-600">
-                    <label
-                      htmlFor="paymentProof"
-                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1"
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="paymentProof"
-                        name="paymentProof"
-                        type="file"
-                        accept="image/*"
-                        className="sr-only"
-                        onChange={handleFileChange}
-                      />
-                    </label>
+                    <span className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
+                      Upload a file
+                    </span>
                     <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                 </div>
+                <input
+                  id="paymentProof"
+                  name="paymentProof"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={handleFileChange}
+                  aria-required="true"
+                  aria-invalid={!!errors.paymentProof}
+                  aria-describedby={errors.paymentProof ? 'paymentProof-error' : undefined}
+                />
               </div>
               {formData.paymentProof && (
                 <div className="mt-2">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600" aria-live="polite">
                     Selected file: {formData.paymentProof.name}
                   </p>
                 </div>
               )}
               {errors.paymentProof && (
-                <p className="mt-1 text-sm text-red-600">{errors.paymentProof}</p>
+                <p id="paymentProof-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
+                  {errors.paymentProof}
+                </p>
               )}
             </div>
 
             {/* Submit Status Messages */}
             {submitStatus === 'success' && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+              <div className="p-4 bg-green-50 border border-green-200 rounded-md" role="alert" aria-live="polite">
                 <p className="text-sm text-green-800">{submitMessage}</p>
               </div>
             )}
             
             {submitStatus === 'error' && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-md" role="alert" aria-live="polite">
                 <p className="text-sm text-red-800">{submitMessage}</p>
               </div>
             )}
@@ -346,16 +373,19 @@ export default function BookingFormPage({ params }: PageProps) {
               <button
                 type="submit"
                 disabled={isSubmitting}
+                aria-label={isSubmitting ? 'Submitting booking form...' : 'Submit booking form'}
                 className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base min-h-[44px]"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Booking'}
               </button>
-                             <Link
-                 href={`/book/${tripId}`}
-                 className="flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-300 text-center text-sm md:text-base min-h-[44px] flex items-center justify-center"
-               >
-                 Back to Trip
-               </Link>
+              <Link
+                href={`/book/${tripId}`}
+                className="flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-300 text-center text-sm md:text-base min-h-[44px] flex items-center justify-center"
+                role="button"
+                aria-label="Go back to trip details"
+              >
+                Back to Trip
+              </Link>
             </div>
           </form>
         </div>

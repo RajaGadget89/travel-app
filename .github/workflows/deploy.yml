@@ -3,8 +3,16 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - main
-      - 'feature/**'
+      - main                # 🚀 Production branch: สำหรับโค้ดที่พร้อม deploy ขึ้น Production
+      - develop             # 🧪 Development branch: สำหรับรวม feature หลายตัวก่อน release
+      - 'feature/**'        # 🧩 Feature branches: ใช้พัฒนาแต่ละฟีเจอร์ เช่น feature/user-profile
+      - 'fix/**'            # 🐞 Bugfix branches: แก้ไขบั๊กทั่วไป เช่น fix/login-error
+      - 'bugfix/**'         # 🐞 Alternative bugfix naming (บางทีมใช้ bugfix แทน fix)
+      - 'hotfix/**'         # 🚑 Critical fix branches: แก้ไขเร่งด่วนที่กระทบ Production
+      - 'release/**'        # 🎯 Release branches: ใช้เตรียม release ก่อน merge เข้าสู่ main
+      - 'experiment/**'     # 🔬 Experimental branches: ทดลองฟีเจอร์/แนวคิดใหม่ๆ ยังไม่ใช่ของจริง
+      - 'ci/**'             # ⚙️ CI/CD testing branches: ทดสอบหรือปรับปรุง pipeline หรือ build config
+      - 'test/**'           # 🧪 Test-specific branches: สำหรับการทดสอบทั่วไป (UI, devtools, etc.)
   pull_request:
 
 jobs:

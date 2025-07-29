@@ -1,4 +1,4 @@
-interface Trip {
+export interface Trip {
   id: string;
   title: string;
   description: string;
@@ -17,7 +17,7 @@ export const trips: Trip[] = [
     days: 1,
     price: 0,
     category: "OneDay",
-    image: "/images/trips/bigbelly-hatyai.jpg",
+    image: "/images/trips/bigbelly-hatyai.png",
     timeline: [
       { time: "09:00", activity: "อาหารเช้า: ข้าวมันไก่โกตี๋ / กุ๊กชัยติ่มซำ / หมี่เบตง" },
       { time: "10:30", activity: "คาเฟ่: The Company Coffee / Realm Songkhla" },
@@ -36,7 +36,7 @@ export const trips: Trip[] = [
     days: 1,
     price: 1490,
     category: "OneDay",
-    image: "/images/trips/satingphra-yinyang.jpg",
+    image: "/images/trips/satingphra-yinyang.png",
     timeline: [
       { time: "09:30", activity: "รวมตัวผู้ร่วมทริป" },
       { time: "10:15", activity: "ออกเดินทางจากหาดใหญ่" },
@@ -54,7 +54,7 @@ export const trips: Trip[] = [
     days: 3,
     price: 6500,
     category: "MultiDay",
-    image: "/images/trips/lipe-3d2n.jpg",
+    image: "/images/trips/lipe-3d2n.png",
     timeline: [
       { time: "Day 1", activity: "เดินทางจากสนามบินหาดใหญ่ → ท่าเรือปากบารา → หลีเป๊ะ" },
       { time: "Day 2", activity: "ดำน้ำเกาะหินงาม / เกาะอาดัง / เกาะราวี / เกาะยาง / เกาะยิบัง" },
@@ -68,7 +68,7 @@ export const trips: Trip[] = [
     days: 2,
     price: 3990,
     category: "MultiDay",
-    image: "/images/trips/penang-2d1n.jpg",
+    image: "/images/trips/penang-2d1n.png",
     timeline: [
       { time: "Day 1", activity: "เดินทางจากหาดใหญ่ → Penang Hill / Street Art / Gurney Plaza" },
       { time: "Day 2", activity: "วัดเขาเต่า / เช็คเอาท์ / เดินทางกลับ" }
@@ -81,7 +81,7 @@ export const trips: Trip[] = [
     days: 3,
     price: 6500,
     category: "MultiDay",
-    image: "/images/trips/genting-penang-3d2n.jpg",
+    image: "/images/trips/genting-penang-3d2n.png",
     timeline: [
       { time: "Day 1", activity: "หาดใหญ่ → ถ้ำเปรัค → เก็นติ้ง ไฮแลนด์" },
       { time: "Day 2", activity: "City tour KL → ตึกแฝด → ปีนัง → Chew Jetty → Gurney Plaza" },
@@ -95,7 +95,7 @@ export const trips: Trip[] = [
     days: 1,
     price: 999,
     category: "OneDay",
-    image: "/images/trips/songkhla-oldtown.jpg",
+    image: "/images/trips/songkhla-oldtown.png",
     timeline: [
       { time: "08:00", activity: "รับคณะจากที่พัก เดินทางสู่สวนสาธารณะหาดใหญ่" },
       { time: "08:30", activity: "แวะไหว้พระ, เยี่ยมชม Street Art เมืองเก่าสงขลา" },
