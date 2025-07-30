@@ -2,30 +2,32 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { trips } from '../../../../src/data/trips';
-import { tripFormSchema } from '../../../../src/data/tripForms';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import TripFormFields, { FormField, FormData, FormErrors } from '../../../components/TripFormFields';
+import { buildFormSchema, createInitialFormData } from '../../../../src/utils/formSchemaBuilder';
+
+interface Trip {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  duration: string;
+  description: string;
+  timeline: string[];
+  formRequirements: Array<{
+    name: string;
+    label: string;
+    required: boolean;
+  }>;
+  image?: string;
+}
 
 interface PageProps {
   params: Promise<{
     tripId: string;
   }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
-
-interface FormField {
-  name: string;
-  label: string;
-  type: string;
-  required: boolean;
-}
-
-interface FormData {
-  [key: string]: string | File | null;
-}
-
-interface FormErrors {
-  [key: string]: string;
 }
 
 export default function BookingFormPage({ params }: PageProps) {
@@ -36,7 +38,7 @@ export default function BookingFormPage({ params }: PageProps) {
   const [submitMessage, setSubmitMessage] = useState('');
   const [tripId, setTripId] = useState<string>('');
   const [formSchema, setFormSchema] = useState<FormField[]>([]);
-  const [trip, setTrip] = useState<any>(null);
+  const [trip, setTrip] = useState<Trip | null>(null);
   const [imageBase64, setImageBase64] = useState<string>('');
 
   // Get trip data and form schema
@@ -50,18 +52,12 @@ export default function BookingFormPage({ params }: PageProps) {
     }
     setTrip(tripData);
 
-    // Get form schema for this trip
-    const schema = tripFormSchema[id as keyof typeof tripFormSchema];
-    if (!schema) {
-      notFound();
-    }
+    // Build dynamic form schema based on trip requirements
+    const schema = buildFormSchema(tripData.formRequirements);
     setFormSchema(schema);
 
     // Initialize form data with empty values
-    const initialFormData: FormData = {};
-    schema.forEach(field => {
-      initialFormData[field.name] = '';
-    });
+    const initialFormData = createInitialFormData(schema);
     setFormData(initialFormData);
   }, [params]);
 
@@ -165,8 +161,8 @@ export default function BookingFormPage({ params }: PageProps) {
       const phone = formData.phone || formData.phoneNumber || '';
       const email = formData.email || '';
       const extractedTripId = tripId || trip?.id || '';
-      const tripName = trip?.name || trip?.title || '';
-      const tripCategory = trip?.category || trip?.tripCategory || '';
+      const tripName = trip?.name || '';
+      const tripCategory = trip?.category || '';
       const citizenId = formData.citizenId || '';
       const passportNumber = formData.passportNumber || '';
       const passportExpiry = formData.passportExpiry || '';
@@ -267,10 +263,7 @@ export default function BookingFormPage({ params }: PageProps) {
           setSubmitMessage(responseData.message || 'Booking submitted successfully! We will contact you soon.');
           
           // Reset form
-          const resetFormData: FormData = {};
-          formSchema.forEach(field => {
-            resetFormData[field.name] = '';
-          });
+          const resetFormData = createInitialFormData(formSchema);
           setFormData(resetFormData);
           setImageBase64('');
         } else {
@@ -289,102 +282,7 @@ export default function BookingFormPage({ params }: PageProps) {
     }
   };
 
-  // Render form field based on type
-  const renderField = (field: FormField) => {
-    const value = formData[field.name];
-    const error = errors[field.name];
 
-    switch (field.type) {
-      case 'textarea':
-        return (
-          <textarea
-            id={field.name}
-            name={field.name}
-            value={typeof value === 'string' ? value : ''}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            aria-required={field.required}
-            aria-invalid={!!error}
-            aria-describedby={error ? `${field.name}-error` : undefined}
-            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base resize-vertical min-h-[100px] ${
-              error ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder={`Enter ${field.label.toLowerCase()}`}
-          />
-        );
-
-      case 'file':
-        return (
-          <div 
-            className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors cursor-pointer"
-            role="button"
-            tabIndex={0}
-            onClick={() => document.getElementById(field.name)?.click()}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                document.getElementById(field.name)?.click();
-              }
-            }}
-            aria-labelledby={`${field.name}-label`}
-            aria-describedby={error ? `${field.name}-error` : undefined}
-            aria-invalid={!!error}
-          >
-            <div className="space-y-1 text-center">
-              <svg
-                className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div className="flex flex-col sm:flex-row text-sm text-gray-600">
-                <span id={`${field.name}-label`} className="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
-                  Upload a file
-                </span>
-                <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>
-              </div>
-              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-            </div>
-            <input
-              id={field.name}
-              name={field.name}
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={(e) => handleFileChange(field.name, e.target.files?.[0] || null)}
-              aria-required={field.required}
-              aria-invalid={!!error}
-              aria-describedby={error ? `${field.name}-error` : undefined}
-            />
-          </div>
-        );
-
-      default:
-        return (
-          <input
-            type={field.type}
-            id={field.name}
-            name={field.name}
-            value={typeof value === 'string' ? value : ''}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            aria-required={field.required}
-            aria-invalid={!!error}
-            aria-describedby={error ? `${field.name}-error` : undefined}
-            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
-              error ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder={`Enter ${field.label.toLowerCase()}`}
-          />
-        );
-    }
-  };
 
   // Load trip data when component mounts
   useEffect(() => {
@@ -424,7 +322,7 @@ export default function BookingFormPage({ params }: PageProps) {
                 type="text"
                 id="tripName"
                 name="tripName"
-                value={trip.title}
+                value={trip.name}
                 readOnly
                 aria-readonly="true"
                 className="w-full px-3 py-3 md:py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 text-sm md:text-base"
@@ -432,26 +330,13 @@ export default function BookingFormPage({ params }: PageProps) {
             </div>
 
             {/* Dynamic Form Fields */}
-            {formSchema.map((field) => (
-              <div key={field.name}>
-                <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-2">
-                  {field.label} {field.required && <span className="text-red-500" aria-label="required">*</span>}
-                </label>
-                {renderField(field)}
-                {errors[field.name] && (
-                  <p id={`${field.name}-error`} className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                    {errors[field.name]}
-                  </p>
-                )}
-                {field.type === 'file' && formData[field.name] instanceof File && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600" aria-live="polite">
-                      Selected file: {(formData[field.name] as File).name}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
+            <TripFormFields
+              formSchema={formSchema}
+              formData={formData}
+              errors={errors}
+              onInputChange={handleInputChange}
+              onFileChange={handleFileChange}
+            />
 
             {/* Submit Status Messages */}
             {submitStatus === 'success' && (
