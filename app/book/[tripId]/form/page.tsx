@@ -4,6 +4,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { trips } from '../../../../src/data/trips';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import TripFormFields, { FormField, FormData, FormErrors } from '../../../components/TripFormFields';
+import { buildFormSchema, createInitialFormData } from '../../../../src/utils/formSchemaBuilder';
+
+interface Trip {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  duration: string;
+  description: string;
+  timeline: string[];
+  formRequirements: Array<{
+    name: string;
+    label: string;
+    required: boolean;
+  }>;
+  image?: string;
+}
 
 interface PageProps {
   params: Promise<{
@@ -12,96 +30,115 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-interface FormData {
-  fullName: string;
-  phone: string;
-  email: string;
-  tripName: string;
-  paymentProof: File | null;
-}
-
-interface FormErrors {
-  fullName?: string;
-  phone?: string;
-  email?: string;
-  paymentProof?: string;
-}
-
 export default function BookingFormPage({ params }: PageProps) {
-  const [formData, setFormData] = useState<FormData>({
-    fullName: '',
-    phone: '',
-    email: '',
-    tripName: '',
-    paymentProof: null,
-  });
-  
+  const [formData, setFormData] = useState<FormData>({});
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
   const [tripId, setTripId] = useState<string>('');
+  const [formSchema, setFormSchema] = useState<FormField[]>([]);
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [imageBase64, setImageBase64] = useState<string>('');
 
-  // Get trip data
+  // Get trip data and form schema
   const getTripData = useCallback(async () => {
     const { tripId: id } = await params;
     setTripId(id);
-    const trip = trips.find(t => t.id === id);
     
-    if (!trip) {
+    const tripData = trips.find(t => t.id === id);
+    if (!tripData) {
       notFound();
     }
+    setTrip(tripData);
 
-    // Set trip name in form data
-    setFormData(prev => ({ ...prev, tripName: trip.title }));
-    
-    return trip;
+    // Build dynamic form schema based on trip requirements
+    const schema = buildFormSchema(tripData.formRequirements);
+    setFormSchema(schema);
+
+    // Initialize form data with empty values
+    const initialFormData = createInitialFormData(schema);
+    setFormData(initialFormData);
   }, [params]);
 
   // Validate form fields
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
-    }
+    formSchema.forEach(field => {
+      const value = formData[field.name];
+      
+      if (field.required) {
+        if (!value || (typeof value === 'string' && !value.trim())) {
+          newErrors[field.name] = `${field.label} is required`;
+        }
+      }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^[0-9+\-\s()]+$/.test(formData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number';
-    }
+      // Additional validation for specific field types
+      if (field.type === 'file' && field.required && !value) {
+        newErrors[field.name] = `${field.label} is required`;
+      }
 
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    if (!formData.paymentProof) {
-      newErrors.paymentProof = 'Payment proof is required';
-    }
+      // Validate that image base64 is available for required file fields
+      if (field.type === 'file' && field.required && field.name === 'paymentProof' && !imageBase64) {
+        newErrors[field.name] = `${field.label} is required`;
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle input change
+  const handleInputChange = (fieldName: string, value: string) => {
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
+  };
+
   // Handle file upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = (fieldName: string, file: File | null) => {
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({ ...prev, paymentProof: 'Please upload an image file' }));
+      // Validate file type for image files
+      if (fieldName === 'paymentProof' && !file.type.startsWith('image/')) {
+        setErrors(prev => ({ ...prev, [fieldName]: 'Please upload an image file' }));
         return;
       }
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, paymentProof: 'File size must be less than 5MB' }));
+        setErrors(prev => ({ ...prev, [fieldName]: 'File size must be less than 5MB' }));
         return;
       }
 
-      setFormData(prev => ({ ...prev, paymentProof: file }));
-      setErrors(prev => ({ ...prev, paymentProof: undefined }));
+      // Convert image to base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        setImageBase64(base64String);
+      };
+      reader.onerror = () => {
+        setErrors(prev => ({ ...prev, [fieldName]: 'Failed to process image file' }));
+        setImageBase64('');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Clear base64 when no file is selected
+      setImageBase64('');
+    }
+
+    setFormData(prev => ({ ...prev, [fieldName]: file }));
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
     }
   };
 
@@ -117,27 +154,105 @@ export default function BookingFormPage({ params }: PageProps) {
     setSubmitStatus('idle');
 
     try {
-      // Convert image to base64
-      const base64Image = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(formData.paymentProof!);
+      // Extract all fields from form data with fallbacks
+      const title = formData.title || '';
+      const firstName = formData.firstName || '';
+      const lastName = formData.lastName || '';
+      const phone = formData.phone || formData.phoneNumber || '';
+      const email = formData.email || '';
+      const extractedTripId = tripId || trip?.id || '';
+      const tripName = trip?.name || '';
+      const tripCategory = trip?.category || '';
+      const citizenId = formData.citizenId || '';
+      const passportNumber = formData.passportNumber || '';
+      const passportExpiry = formData.passportExpiry || '';
+      const roomType = formData.roomType || '';
+      const note = formData.note || formData.additionalNotes || '';
+      const extractedImageBase64 = imageBase64;
+
+      // Debug: Log all field values to identify which ones are missing
+      console.log('Field values for validation:', {
+        title: title || 'EMPTY',
+        firstName: firstName || 'EMPTY',
+        lastName: lastName || 'EMPTY',
+        phone: phone || 'EMPTY',
+        email: email || 'EMPTY',
+        extractedTripId: extractedTripId || 'EMPTY',
+        tripName: tripName || 'EMPTY',
+        tripCategory: tripCategory || 'EMPTY',
+        citizenId: citizenId || 'EMPTY',
+        passportNumber: passportNumber || 'EMPTY',
+        passportExpiry: passportExpiry || 'EMPTY',
+        roomType: roomType || 'EMPTY',
+        note: note || 'EMPTY',
+        extractedImageBase64: extractedImageBase64 ? 'PRESENT' : 'EMPTY'
       });
 
-      // Send to our API route which will forward to Google Apps Script webhook
+      // Validate required fields before submission - only consider truly missing values
+      const missingFields = [];
+      
+      if (!firstName || (typeof firstName === 'string' && firstName.trim() === '')) {
+        missingFields.push('firstName');
+      }
+      if (!lastName || (typeof lastName === 'string' && lastName.trim() === '')) {
+        missingFields.push('lastName');
+      }
+      if (!phone || (typeof phone === 'string' && phone.trim() === '')) {
+        missingFields.push('phone');
+      }
+      if (!extractedTripId || (typeof extractedTripId === 'string' && extractedTripId.trim() === '')) {
+        missingFields.push('tripId');
+      }
+      if (!tripName || (typeof tripName === 'string' && tripName.trim() === '')) {
+        missingFields.push('tripName');
+      }
+      if (!tripCategory || (typeof tripCategory === 'string' && tripCategory.trim() === '')) {
+        missingFields.push('tripCategory');
+      }
+      if (!extractedImageBase64 || (typeof extractedImageBase64 === 'string' && extractedImageBase64.trim() === '')) {
+        missingFields.push('imageBase64');
+      }
+
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Construct the payload with all fields matching Google Sheet headers
+      const payload = {
+        title,
+        firstName,
+        lastName,
+        phone,
+        email,
+        tripId: extractedTripId,
+        tripName,
+        tripCategory,
+        citizenId,
+        passportNumber,
+        passportExpiry,
+        roomType,
+        note,
+        imageBase64: extractedImageBase64,
+        fields: { ...formData }
+      };
+
+      // Remove File objects from fields
+      Object.keys(payload.fields).forEach(key => {
+        if (payload.fields[key] instanceof File) {
+          delete payload.fields[key];
+        }
+      });
+
+      // Debug: Log the payload before sending
+      console.log('Payload:', payload);
+
+      // Send to API route
       const response = await fetch('/api/submit-booking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          phone: formData.phone,
-          email: formData.email || '',
-          tripId: tripId,
-          tripName: formData.tripName,
-          imageBase64: base64Image,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -146,14 +261,11 @@ export default function BookingFormPage({ params }: PageProps) {
         if (responseData.success) {
           setSubmitStatus('success');
           setSubmitMessage(responseData.message || 'Booking submitted successfully! We will contact you soon.');
+          
           // Reset form
-          setFormData({
-            fullName: '',
-            phone: '',
-            email: '',
-            tripName: formData.tripName,
-            paymentProof: null,
-          });
+          const resetFormData = createInitialFormData(formSchema);
+          setFormData(resetFormData);
+          setImageBase64('');
         } else {
           throw new Error(responseData.message || 'Failed to submit booking');
         }
@@ -170,10 +282,24 @@ export default function BookingFormPage({ params }: PageProps) {
     }
   };
 
+
+
   // Load trip data when component mounts
   useEffect(() => {
     getTripData();
   }, [getTripData]);
+
+  if (!trip || formSchema.length === 0) {
+    return (
+      <main className="min-h-screen bg-gray-50 py-6 md:py-8">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="text-center">
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 py-6 md:py-8">
@@ -196,164 +322,21 @@ export default function BookingFormPage({ params }: PageProps) {
                 type="text"
                 id="tripName"
                 name="tripName"
-                value={formData.tripName}
+                value={trip.name}
                 readOnly
                 aria-readonly="true"
                 className="w-full px-3 py-3 md:py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 text-sm md:text-base"
               />
             </div>
 
-            {/* Full Name */}
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500" aria-label="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, fullName: e.target.value }));
-                  if (errors.fullName) {
-                    setErrors(prev => ({ ...prev, fullName: undefined }));
-                  }
-                }}
-                aria-required="true"
-                aria-invalid={!!errors.fullName}
-                aria-describedby={errors.fullName ? 'fullName-error' : undefined}
-                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
-                  errors.fullName ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your full name"
-              />
-              {errors.fullName && (
-                <p id="fullName-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                  {errors.fullName}
-                </p>
-              )}
-            </div>
-
-            {/* Phone Number */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number <span className="text-red-500" aria-label="required">*</span>
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, phone: e.target.value }));
-                  if (errors.phone) {
-                    setErrors(prev => ({ ...prev, phone: undefined }));
-                  }
-                }}
-                aria-required="true"
-                aria-invalid={!!errors.phone}
-                aria-describedby={errors.phone ? 'phone-error' : undefined}
-                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
-                  errors.phone ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your phone number"
-              />
-              {errors.phone && (
-                <p id="phone-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                  {errors.phone}
-                </p>
-              )}
-            </div>
-
-            {/* Email Address */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address <span className="text-gray-500 text-xs">(Optional)</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, email: e.target.value }));
-                  if (errors.email) {
-                    setErrors(prev => ({ ...prev, email: undefined }));
-                  }
-                }}
-                aria-required="false"
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? 'email-error' : undefined}
-                className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your email address"
-              />
-              {errors.email && (
-                <p id="email-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            {/* Payment Proof Upload */}
-            <div>
-              <label htmlFor="paymentProof" className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Proof of Payment <span className="text-red-500" aria-label="required">*</span>
-              </label>
-              <div 
-                className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors"
-                role="group"
-                aria-labelledby="paymentProof"
-              >
-                <div className="space-y-1 text-center">
-                  <svg
-                    className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-400"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="flex flex-col sm:flex-row text-sm text-gray-600">
-                    <span className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
-                      Upload a file
-                    </span>
-                    <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-                </div>
-                <input
-                  id="paymentProof"
-                  name="paymentProof"
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={handleFileChange}
-                  aria-required="true"
-                  aria-invalid={!!errors.paymentProof}
-                  aria-describedby={errors.paymentProof ? 'paymentProof-error' : undefined}
-                />
-              </div>
-              {formData.paymentProof && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600" aria-live="polite">
-                    Selected file: {formData.paymentProof.name}
-                  </p>
-                </div>
-              )}
-              {errors.paymentProof && (
-                <p id="paymentProof-error" className="mt-1 text-sm text-red-600" role="alert" aria-live="polite">
-                  {errors.paymentProof}
-                </p>
-              )}
-            </div>
+            {/* Dynamic Form Fields */}
+            <TripFormFields
+              formSchema={formSchema}
+              formData={formData}
+              errors={errors}
+              onInputChange={handleInputChange}
+              onFileChange={handleFileChange}
+            />
 
             {/* Submit Status Messages */}
             {submitStatus === 'success' && (

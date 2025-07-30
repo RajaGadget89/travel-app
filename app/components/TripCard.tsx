@@ -1,6 +1,24 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Trip } from '../../src/data/trips';
+
+// Define Trip interface based on the actual trip data structure
+interface Trip {
+  id: string;
+  name: string;
+  title?: string;
+  category: string;
+  price: number;
+  duration: string;
+  days?: number;
+  description: string;
+  timeline: string[];
+  formRequirements: Array<{
+    name: string;
+    label: string;
+    required: boolean;
+  }>;
+  image?: string;
+}
 
 interface TripCardProps {
   trip: Trip;
@@ -11,11 +29,35 @@ export default function TripCard({ trip }: TripCardProps) {
   const formattedPrice = `฿${trip.price.toLocaleString()}`;
   
   // Format duration
-  const duration = trip.days === 1 ? '1 Day' : `${trip.days} Days`;
-  
+  const duration = trip.duration || (trip.days === 1 ? '1 Day' : `${trip.days} Days`);
 
-  
+  // Handle image source with fallback
+  const getImageSrc = () => {
+    if (!trip.image || trip.image.trim() === '') {
+      return '/images/trips/default-trip.jpg';
+    }
+    
+    // If image is just a filename, prepend the path
+    if (!trip.image.startsWith('/')) {
+      return `/images/trips/${trip.image}`;
+    }
+    
+    return trip.image;
+  };
 
+  // Handle alt text with fallback
+  const getAltText = () => {
+    if (trip.name) {
+      return `Trip to ${trip.name}`;
+    }
+    if (trip.title) {
+      return `Trip to ${trip.title}`;
+    }
+    return 'Trip image';
+  };
+
+  const imageSrc = getImageSrc();
+  const altText = getAltText();
 
   return (
     <Link 
@@ -25,16 +67,18 @@ export default function TripCard({ trip }: TripCardProps) {
       <div className="relative overflow-hidden rounded-lg bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
         {/* Image Container */}
         <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
-          <Image
-            src={trip.image}
-            alt={trip.title}
-            fill
-            loading="lazy"
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover group-hover:scale-110 transition-transform duration-500"
-          />
+          {imageSrc && (
+            <Image
+              src={imageSrc}
+              alt={altText}
+              fill
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+          )}
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
           
@@ -63,7 +107,7 @@ export default function TripCard({ trip }: TripCardProps) {
         {/* Content */}
         <div className="p-4 md:p-6">
           <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-            {trip.title}
+            {trip.name}
           </h3>
           <p className="text-gray-600 text-sm leading-relaxed mb-3 md:mb-4 line-clamp-3">
             {trip.description}

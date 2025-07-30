@@ -23,15 +23,26 @@ export default async function TripDetailPage({ params }: PageProps) {
   const formattedPrice = `฿${trip.price.toLocaleString()}`;
   
   // Format duration
-  const duration = trip.days === 1 ? '1 Day' : `${trip.days} Days`;
+  const duration = trip.duration;
+
+  // Handle image source with fallback
+  const getImageSrc = (image?: string): string => {
+    if (!image || image.trim() === '') {
+      return '/images/trips/default-trip.jpg';
+    }
+    if (!image.startsWith('/')) {
+      return `/images/trips/${image}`;
+    }
+    return image;
+  };
 
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] overflow-hidden">
         <Image
-          src={trip.image}
-          alt={trip.title}
+          src={getImageSrc(trip.image)}
+          alt={trip.name || 'Trip image'}
           fill
           className="object-cover"
           priority
@@ -42,7 +53,7 @@ export default async function TripDetailPage({ params }: PageProps) {
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 flex items-center justify-center px-4">
           <div className="text-center text-white">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-2 md:mb-4">{trip.title}</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-2 md:mb-4">{trip.name}</h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl">{trip.description}</p>
           </div>
         </div>

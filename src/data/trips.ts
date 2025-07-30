@@ -1,109 +1,142 @@
-export interface Trip {
-  id: string;
-  title: string;
-  description: string;
-  days: number;
-  price: number;
-  category: 'OneDay' | 'MultiDay';
-  image: string;
-  timeline?: { time: string; activity: string }[];
-}
-
-export const trips: Trip[] = [
-  {
-    id: "bigbelly-hatyai",
-    title: "ทัวร์ตัวแตกหาดใหญ่",
-    description: "ตะลุยกินร้านเด็ดหาดใหญ่แบบจัดเต็ม 1 วันเต็ม เดินทางด้วยรถเหมาหรือเช่ารถเอง เที่ยวครบทั้งวัด คาเฟ่ และร้านในตำนาน เช่น ข้าวมันไก่โกตี๋, กุ๊กชัยติ่มซำ, Foreseen ชาชัก, วัดฉื่อฉาง, ซุ้มประตูไชน่าทาวน์ ฯลฯ",
-    days: 1,
-    price: 0,
-    category: "OneDay",
-    image: "/images/trips/bigbelly-hatyai.png",
-    timeline: [
-      { time: "09:00", activity: "อาหารเช้า: ข้าวมันไก่โกตี๋ / กุ๊กชัยติ่มซำ / หมี่เบตง" },
-      { time: "10:30", activity: "คาเฟ่: The Company Coffee / Realm Songkhla" },
-      { time: "11:00", activity: "ขึ้นเขาคอหงส์ ไหว้พระบรมรูป ร.5 / เจ้าแม่กวนอิม / พระพรหม" },
-      { time: "12:00", activity: "อาหารเที่ยง: ร้านกันเอง / ในรู / ไก่ทอดเดชา / อ้า" },
-      { time: "13:30", activity: "ขนมหวาน: มันเดือยถั่ว (สถานีรถไฟ)" },
-      { time: "14:30", activity: "คาเฟ่: Lucas.HDY / Local.hdy / Away Coffee" },
-      { time: "15:00", activity: "ไหว้พระ: วัดฉื่อฉาง / ศาลเจ้าท่งเซียเซี่ยงตึ๊ง / China Town" },
-      { time: "21:00", activity: "ปิดท้ายสายหวาน: ป้าแอ๊ะ / โกอ้วน / Zystem / Drop" }
-    ]
-  },
+export const trips = [
   {
     id: "satingphra-yinyang",
-    title: "สงขลา-สทิงพระ: ตามรอยหลวงปู่ทวด & Lunch Table Course",
-    description: "ตามรอยหลวงปู่ทวดในแดนใต้ พร้อมดื่มด่ำอาหารท้องถิ่นในรูปแบบ Lunch Table Course และกิจกรรมทำไข่ครอบแบบ workshop ณ ฟาร์มท้องถิ่น",
-    days: 1,
-    price: 1490,
+    name: "สงขลา-สทิงพระ: ตามรอยหลวงปู่ทวด & Lunch Table Course",
     category: "OneDay",
-    image: "/images/trips/satingphra-yinyang.png",
+    price: 1490,
+    duration: "1 Day",
+    description: "ตามรอยหลวงปู่ทวดในแดนใต้ พร้อมสัมผัสอาหารท้องถิ่นในรูปแบบ Lunch Table Course และกิจกรรมทำไข่ครอบแบบ workshop ณ ฟาร์มท้องถิ่น",
     timeline: [
-      { time: "09:30", activity: "รวมตัวผู้ร่วมทริป" },
-      { time: "10:15", activity: "ออกเดินทางจากหาดใหญ่" },
-      { time: "10:45", activity: "จิบกาแฟยามเช้า Boot Energy" },
-      { time: "11:30", activity: "กิจกรรมไข่ครอบ & Workshop ณ ฟาร์มสุรารวยสุข" },
-      { time: "12:30", activity: "Lunch Table Course สไตล์ท้องถิ่น (2 ชั่วโมง)" },
-      { time: "14:30", activity: "สักการะวัดสำคัญ: วัดต้นเลียบ / วัดดีหลวง / วัดพะโคะ" },
-      { time: "17:30", activity: "เดินทางกลับ" }
-    ]
+      "09:30 รวมตัวที่จุดนัดพบ",
+      "10:15 ออกเดินทางจากหาดใหญ่",
+      "10:45 รับกาแฟยามเช้า Boot Energy",
+      "11:30 กิจกรรมไข่ครอบ & Workshop",
+      "12:30 Lunch Table Course (2 ชั่วโมง)",
+      "14:30 สักการะวัดสำคัญ วัดดีหลวง / วัดจะโหนง",
+      "17:30 เดินทางกลับ"
+    ],
+    formRequirements: [
+      { name: "citizenId", label: "เลขบัตรประชาชน", required: true }
+    ],
+    image: "satingphra-yinyang.png"
   },
+
   {
     id: "lipe-3d2n",
-    title: "เที่ยวหลีเป๊ะ Chill @ มัลดีฟเมืองไทย",
-    description: "ดำน้ำ ชมปะการังที่เกาะหินงาม เกาะราวี เกาะยาง เกาะอาดัง พร้อมพักรีสอร์ท 2 คืน และล่องเรือไปเกาะไข่, อุทยานตะรุเตา, ซุ้มประตูหิน",
-    days: 3,
-    price: 6500,
+    name: "เที่ยวหลีเป๊ะ Chill @ มัลดีฟเมืองไทย",
     category: "MultiDay",
-    image: "/images/trips/lipe-3d2n.png",
+    price: 6500,
+    duration: "3 Days",
+    description: "ดำน้ำ ชมปะการังที่เกาะหินงาม เกาะราวี เกาะยาง เกาะอาดัง พร้อมพักรีสอร์ท 2 คืน และล่องเรือไปเกาะไข่, อุทยานตะรุเตา, ชิมปลาระยำ",
     timeline: [
-      { time: "Day 1", activity: "เดินทางจากสนามบินหาดใหญ่ → ท่าเรือปากบารา → หลีเป๊ะ" },
-      { time: "Day 2", activity: "ดำน้ำเกาะหินงาม / เกาะอาดัง / เกาะราวี / เกาะยาง / เกาะยิบัง" },
-      { time: "Day 3", activity: "เดินทางกลับขึ้นฝั่ง → สนามบินหาดใหญ่" }
-    ]
+      "Day 1: สนามบินหาดใหญ่ → ท่าเรือ → หลีเป๊ะ",
+      "Day 2: ดำน้ำเกาะไข่ / เกาะหินงาม / อ่าวลิง",
+      "Day 3: เดินทางกลับ"
+    ],
+    formRequirements: [
+      { name: "passportNumber", label: "หมายเลขพาสปอร์ต", required: true },
+      { name: "passportExpiry", label: "วันหมดอายุพาสปอร์ต", required: true },
+      { name: "roomType", label: "ประเภทห้องพัก", required: true }
+    ],
+    image: "lipe-3d2n.png"
   },
+
   {
     id: "penang-2d1n",
-    title: "เที่ยวปีนัง 2 วัน 1 คืน",
-    description: "ชม Street Art ปีนัง, Penang Hill, Gurney Plaza, วัดเขาเต่า พร้อมพักโรงแรมระดับมาตรฐาน 1 คืน พร้อมไกด์",
-    days: 2,
-    price: 3990,
+    name: "เที่ยวปีนัง 2 วัน 1 คืน",
     category: "MultiDay",
-    image: "/images/trips/penang-2d1n.png",
+    price: 3990,
+    duration: "2 Days",
+    description: "Street Art ปีนัง, Penang Hill, Gurney Plaza, วัดไทย วัดพม่า พร้อมพักโรงแรมมาตรฐาน 1 คืนที่ปีนัง",
     timeline: [
-      { time: "Day 1", activity: "เดินทางจากหาดใหญ่ → Penang Hill / Street Art / Gurney Plaza" },
-      { time: "Day 2", activity: "วัดเขาเต่า / เช็คเอาท์ / เดินทางกลับ" }
-    ]
+      "Day 1: ด่านสะเดา → Street Art → Penang Hill",
+      "Day 2: วัดไทย วัดพม่า → เดินทางกลับ"
+    ],
+    formRequirements: [
+      { name: "passportNumber", label: "หมายเลขพาสปอร์ต", required: true },
+      { name: "passportExpiry", label: "วันหมดอายุพาสปอร์ต", required: true }
+    ],
+    image: "penang-2d1n.png"
   },
+
   {
     id: "genting-penang-3d2n",
-    title: "เก็นติ้ง - ปีนัง 3 วัน 2 คืน",
-    description: "เยือน Genting Highlands, ถ้ำเปรัค, กัวลาลัมเปอร์, ตึกแฝด, วัดเขาเต่า, พักโรงแรม 2 คืน เที่ยวเต็มอิ่มทั้งธรรมชาติและเมือง",
-    days: 3,
-    price: 6500,
+    name: "เก็นติ้ง - ปีนัง 3 วัน 2 คืน",
     category: "MultiDay",
-    image: "/images/trips/genting-penang-3d2n.png",
+    price: 6500,
+    duration: "3 Days",
+    description: "เยือน Genting Highlands, ถ้ำบาตู, คาเมรอนไฮแลนด์, ปีนัง, ช้อปตลาด, วัดไทย วัดพม่า, พักโรงแรม 2 คืน เที่ยวเต็มอิ่มกับธรรมชาติและเมือง",
     timeline: [
-      { time: "Day 1", activity: "หาดใหญ่ → ถ้ำเปรัค → เก็นติ้ง ไฮแลนด์" },
-      { time: "Day 2", activity: "City tour KL → ตึกแฝด → ปีนัง → Chew Jetty → Gurney Plaza" },
-      { time: "Day 3", activity: "Street Art / Penang Hill / วัดเขาเต่า / กลับหาดใหญ่" }
-    ]
+      "Day 1: ด่านสะเดา → Genting Highlands",
+      "Day 2: คาเมรอนฯ → ปีนัง",
+      "Day 3: ปีนังวัดไทย → วัดพม่า → เดินทางกลับ"
+    ],
+    formRequirements: [
+      { name: "passportNumber", label: "หมายเลขพาสปอร์ต", required: true },
+      { name: "passportExpiry", label: "วันหมดอายุพาสปอร์ต", required: true }
+    ],
+    image: "genting-penang-3d2n.png"
   },
+
   {
     id: "songkhla-oldtown",
-    title: "สงขลาเมืองเก่า Old Town",
-    description: "นั่งรถชมเมืองสงขลา แวะ Street Art เมืองเก่าสงขลา จุดถ่ายรูปคลาสสิก บ้านนายท้าย, ศาลากลาง, ประตูเมือง, บ้านพระไตรฯ และคาเฟ่ FENZI Bakery",
-    days: 1,
-    price: 999,
+    name: "สงขลาเมืองเก่า Old Town",
     category: "OneDay",
-    image: "/images/trips/songkhla-oldtown.png",
+    price: 899,
+    duration: "1 Day",
+    description: "ทัวร์รอบเมืองสงขลา และ Street Art เมืองเก่า พร้อมอาหารท้องถิ่น",
     timeline: [
-      { time: "08:00", activity: "รับคณะจากที่พัก เดินทางสู่สวนสาธารณะหาดใหญ่" },
-      { time: "08:30", activity: "แวะไหว้พระ, เยี่ยมชม Street Art เมืองเก่าสงขลา" },
-      { time: "11:30", activity: "เดินทางไปบ้านน่าถ่ายรูป เช่น บ้านประไพ, บ้านสองรส, บ้านเสนาะฯ" },
-      { time: "13:00", activity: "นั่งรถชมเมืองสงขลา & ถ่ายรูป" },
-      { time: "14:00", activity: "แวะ FENZI Inspired Bakery & Songkhla Station" },
-      { time: "15:00", activity: "เดินทางกลับ" }
+      "09:00 รวมตัวหน้าศาลากลาง",
+      "10:00 เดินชม Street Art",
+      "12:00 รับประทานอาหารกลางวัน",
+      "14:00 อิสระเดินชมเมือง",
+      "16:00 เดินทางกลับ"
+    ],
+    formRequirements: [
+      { name: "citizenId", label: "เลขบัตรประชาชน", required: true }
+    ],
+    image: "songkhla-oldtown.png"
+  },
+
+  {
+    id: "hadyai-fat",
+    name: "ทัวร์ตัวแตกหาดใหญ่",
+    category: "OneDay",
+    price: 850,
+    duration: "1 Day",
+    description: "ตะลุยกินร้านเด็ดหาดใหญ่แบบจัดเต็มใน 1 วันเต็ม",
+    timeline: [
+      "09:00 รวมตัว",
+      "10:00 ร้าน A",
+      "12:00 ร้าน B",
+      "14:00 ร้าน C",
+      "17:00 ร้าน D",
+      "18:30 จบการเดินทาง"
+    ],
+    formRequirements: [
+      { name: "citizenId", label: "เลขบัตรประชาชน", required: true }
     ]
+    // No image property - will use default fallback
+  },
+
+  {
+    id: "bigbelly-hatyai",
+    name: "Big Belly Hatyai Food Tour",
+    category: "OneDay",
+    price: 1200,
+    duration: "1 Day",
+    description: "Explore the best local food spots in Hatyai with our expert food guide",
+    timeline: [
+      "09:00 Meet at central location",
+      "10:00 Local breakfast spot",
+      "12:00 Traditional lunch",
+      "14:00 Street food tour",
+      "16:00 Dessert tasting",
+      "18:00 End of tour"
+    ],
+    formRequirements: [
+      { name: "citizenId", label: "เลขบัตรประชาชน", required: true }
+    ],
+    image: "bigbelly-hatyai.png"
   }
 ];
-

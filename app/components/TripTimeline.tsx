@@ -4,7 +4,7 @@ interface TimelineEntry {
 }
 
 interface TripTimelineProps {
-  timeline: TimelineEntry[];
+  timeline: TimelineEntry[] | string[];
 }
 
 export default function TripTimeline({ timeline }: TripTimelineProps) {
@@ -12,11 +12,31 @@ export default function TripTimeline({ timeline }: TripTimelineProps) {
     return null;
   }
 
+  // Convert string array to TimelineEntry array if needed
+  const timelineEntries: TimelineEntry[] = timeline.map((entry, index) => {
+    if (typeof entry === 'string') {
+      // For string entries, try to extract time and activity
+      const parts = entry.split(': ');
+      if (parts.length >= 2) {
+        return {
+          time: parts[0],
+          activity: parts.slice(1).join(': ')
+        };
+      } else {
+        return {
+          time: `Step ${index + 1}`,
+          activity: entry
+        };
+      }
+    }
+    return entry as TimelineEntry;
+  });
+
   return (
     <div className="mb-6 md:mb-8">
       <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">Trip Timeline</h2>
       <ul className="space-y-3 md:space-y-4">
-        {timeline.map((entry, index) => (
+        {timelineEntries.map((entry, index) => (
           <li key={index} className="flex items-start space-x-3 md:space-x-4">
             {/* Time label - aligned right */}
             <div className="flex-shrink-0">
