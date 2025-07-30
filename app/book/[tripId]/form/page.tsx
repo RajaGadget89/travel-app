@@ -37,6 +37,7 @@ export default function BookingFormPage({ params }: PageProps) {
   const [tripId, setTripId] = useState<string>('');
   const [formSchema, setFormSchema] = useState<FormField[]>([]);
   const [trip, setTrip] = useState<any>(null);
+  const [imageBase64, setImageBase64] = useState<string>('');
 
   // Get trip data and form schema
   const getTripData = useCallback(async () => {
@@ -81,6 +82,11 @@ export default function BookingFormPage({ params }: PageProps) {
       if (field.type === 'file' && field.required && !value) {
         newErrors[field.name] = `${field.label} is required`;
       }
+
+      // Validate that image base64 is available for required file fields
+      if (field.type === 'file' && field.required && field.name === 'paymentProof' && !imageBase64) {
+        newErrors[field.name] = `${field.label} is required`;
+      }
     });
 
     setErrors(newErrors);
@@ -113,6 +119,21 @@ export default function BookingFormPage({ params }: PageProps) {
         setErrors(prev => ({ ...prev, [fieldName]: 'File size must be less than 5MB' }));
         return;
       }
+
+      // Convert image to base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        setImageBase64(base64String);
+      };
+      reader.onerror = () => {
+        setErrors(prev => ({ ...prev, [fieldName]: 'Failed to process image file' }));
+        setImageBase64('');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Clear base64 when no file is selected
+      setImageBase64('');
     }
 
     setFormData(prev => ({ ...prev, [fieldName]: file }));
@@ -137,33 +158,97 @@ export default function BookingFormPage({ params }: PageProps) {
     setSubmitStatus('idle');
 
     try {
-      // Convert image to base64 if paymentProof exists
-      let imageBase64 = '';
-      if (formData.paymentProof && formData.paymentProof instanceof File) {
-        imageBase64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(formData.paymentProof as File);
-        });
+      // Extract all fields from form data with fallbacks
+      const title = formData.title || '';
+      const firstName = formData.firstName || '';
+      const lastName = formData.lastName || '';
+      const phone = formData.phone || formData.phoneNumber || '';
+      const email = formData.email || '';
+      const extractedTripId = tripId || trip?.id || '';
+      const tripName = trip?.name || trip?.title || '';
+      const tripCategory = trip?.category || trip?.tripCategory || '';
+      const citizenId = formData.citizenId || '';
+      const passportNumber = formData.passportNumber || '';
+      const passportExpiry = formData.passportExpiry || '';
+      const roomType = formData.roomType || '';
+      const note = formData.note || formData.additionalNotes || '';
+      const extractedImageBase64 = imageBase64;
+
+      // Debug: Log all field values to identify which ones are missing
+      console.log('Field values for validation:', {
+        title: title || 'EMPTY',
+        firstName: firstName || 'EMPTY',
+        lastName: lastName || 'EMPTY',
+        phone: phone || 'EMPTY',
+        email: email || 'EMPTY',
+        extractedTripId: extractedTripId || 'EMPTY',
+        tripName: tripName || 'EMPTY',
+        tripCategory: tripCategory || 'EMPTY',
+        citizenId: citizenId || 'EMPTY',
+        passportNumber: passportNumber || 'EMPTY',
+        passportExpiry: passportExpiry || 'EMPTY',
+        roomType: roomType || 'EMPTY',
+        note: note || 'EMPTY',
+        extractedImageBase64: extractedImageBase64 ? 'PRESENT' : 'EMPTY'
+      });
+
+      // Validate required fields before submission - only consider truly missing values
+      const missingFields = [];
+      
+      if (!firstName || (typeof firstName === 'string' && firstName.trim() === '')) {
+        missingFields.push('firstName');
+      }
+      if (!lastName || (typeof lastName === 'string' && lastName.trim() === '')) {
+        missingFields.push('lastName');
+      }
+      if (!phone || (typeof phone === 'string' && phone.trim() === '')) {
+        missingFields.push('phone');
+      }
+      if (!extractedTripId || (typeof extractedTripId === 'string' && extractedTripId.trim() === '')) {
+        missingFields.push('tripId');
+      }
+      if (!tripName || (typeof tripName === 'string' && tripName.trim() === '')) {
+        missingFields.push('tripName');
+      }
+      if (!tripCategory || (typeof tripCategory === 'string' && tripCategory.trim() === '')) {
+        missingFields.push('tripCategory');
+      }
+      if (!extractedImageBase64 || (typeof extractedImageBase64 === 'string' && extractedImageBase64.trim() === '')) {
+        missingFields.push('imageBase64');
       }
 
-      // Prepare form data for submission
-      const submissionData: any = {
-        tripId: tripId,
-        tripName: trip.title,
-        ...formData
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Construct the payload with all fields matching Google Sheet headers
+      const payload = {
+        title,
+        firstName,
+        lastName,
+        phone,
+        email,
+        tripId: extractedTripId,
+        tripName,
+        tripCategory,
+        citizenId,
+        passportNumber,
+        passportExpiry,
+        roomType,
+        note,
+        imageBase64: extractedImageBase64,
+        fields: { ...formData }
       };
 
-      // Remove File objects and add base64 image
-      Object.keys(submissionData).forEach(key => {
-        if (submissionData[key] instanceof File) {
-          delete submissionData[key];
+      // Remove File objects from fields
+      Object.keys(payload.fields).forEach(key => {
+        if (payload.fields[key] instanceof File) {
+          delete payload.fields[key];
         }
       });
-      
-      if (imageBase64) {
-        submissionData.imageBase64 = imageBase64;
-      }
+
+      // Debug: Log the payload before sending
+      console.log('Payload:', payload);
 
       // Send to API route
       const response = await fetch('/api/submit-booking', {
@@ -171,7 +256,7 @@ export default function BookingFormPage({ params }: PageProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(submissionData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -187,6 +272,7 @@ export default function BookingFormPage({ params }: PageProps) {
             resetFormData[field.name] = '';
           });
           setFormData(resetFormData);
+          setImageBase64('');
         } else {
           throw new Error(responseData.message || 'Failed to submit booking');
         }
@@ -229,9 +315,19 @@ export default function BookingFormPage({ params }: PageProps) {
       case 'file':
         return (
           <div 
-            className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors"
-            role="group"
-            aria-labelledby={field.name}
+            className="mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors cursor-pointer"
+            role="button"
+            tabIndex={0}
+            onClick={() => document.getElementById(field.name)?.click()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById(field.name)?.click();
+              }
+            }}
+            aria-labelledby={`${field.name}-label`}
+            aria-describedby={error ? `${field.name}-error` : undefined}
+            aria-invalid={!!error}
           >
             <div className="space-y-1 text-center">
               <svg
@@ -249,7 +345,7 @@ export default function BookingFormPage({ params }: PageProps) {
                 />
               </svg>
               <div className="flex flex-col sm:flex-row text-sm text-gray-600">
-                <span className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
+                <span id={`${field.name}-label`} className="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
                   Upload a file
                 </span>
                 <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>

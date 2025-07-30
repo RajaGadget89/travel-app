@@ -5,6 +5,7 @@ export interface Trip {
   days: number;
   price: number;
   category: 'OneDay' | 'MultiDay';
+  tripCategory: 'OneDay' | 'MultiDay';
   image: string;
   timeline?: { time: string; activity: string }[];
 }
@@ -17,6 +18,7 @@ export const trips: Trip[] = [
     days: 1,
     price: 0,
     category: "OneDay",
+    tripCategory: "OneDay",
     image: "/images/trips/bigbelly-hatyai.png",
     timeline: [
       { time: "09:00", activity: "อาหารเช้า: ข้าวมันไก่โกตี๋ / กุ๊กชัยติ่มซำ / หมี่เบตง" },
@@ -36,6 +38,7 @@ export const trips: Trip[] = [
     days: 1,
     price: 1490,
     category: "OneDay",
+    tripCategory: "OneDay",
     image: "/images/trips/satingphra-yinyang.png",
     timeline: [
       { time: "09:30", activity: "รวมตัวผู้ร่วมทริป" },
@@ -54,6 +57,7 @@ export const trips: Trip[] = [
     days: 3,
     price: 6500,
     category: "MultiDay",
+    tripCategory: "MultiDay",
     image: "/images/trips/lipe-3d2n.png",
     timeline: [
       { time: "Day 1", activity: "เดินทางจากสนามบินหาดใหญ่ → ท่าเรือปากบารา → หลีเป๊ะ" },
@@ -68,6 +72,7 @@ export const trips: Trip[] = [
     days: 2,
     price: 3990,
     category: "MultiDay",
+    tripCategory: "MultiDay",
     image: "/images/trips/penang-2d1n.png",
     timeline: [
       { time: "Day 1", activity: "เดินทางจากหาดใหญ่ → Penang Hill / Street Art / Gurney Plaza" },
@@ -81,6 +86,7 @@ export const trips: Trip[] = [
     days: 3,
     price: 6500,
     category: "MultiDay",
+    tripCategory: "MultiDay",
     image: "/images/trips/genting-penang-3d2n.png",
     timeline: [
       { time: "Day 1", activity: "หาดใหญ่ → ถ้ำเปรัค → เก็นติ้ง ไฮแลนด์" },
@@ -95,6 +101,7 @@ export const trips: Trip[] = [
     days: 1,
     price: 999,
     category: "OneDay",
+    tripCategory: "OneDay",
     image: "/images/trips/songkhla-oldtown.png",
     timeline: [
       { time: "08:00", activity: "รับคณะจากที่พัก เดินทางสู่สวนสาธารณะหาดใหญ่" },

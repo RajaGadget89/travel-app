@@ -6,13 +6,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Validate required fields
-    const { fullName, phone, email, tripId, tripName, imageBase64 } = body;
+    const { title, firstName, lastName, phone, email, tripId, tripName, tripCategory, imageBase64 } = body;
     
-    if (!fullName || !phone || !tripId || !tripName || !imageBase64) {
+    if (!firstName || !lastName || !phone || !tripId || !tripName || !tripCategory || !imageBase64) {
       return NextResponse.json(
         { 
           success: false, 
-          message: 'Missing required fields: fullName, phone, tripId, tripName, and imageBase64 are required' 
+          message: 'Missing required fields: firstName, lastName, phone, tripId, tripName, tripCategory, and imageBase64 are required' 
         },
         { status: 400 }
       );
@@ -41,11 +41,14 @@ export async function POST(request: NextRequest) {
     // Prepare data for Google Apps Script webhook
     const webhookData = {
       token: webhookToken,
-      fullName,
+      title,
+      firstName,
+      lastName,
       phone,
       email: email || '',
       tripId,
       tripName,
+      tripCategory,
       imageBase64,
       submittedAt: new Date().toISOString(),
     };
