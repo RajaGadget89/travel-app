@@ -8,11 +8,11 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     const { title, firstName, lastName, phone, email, tripId, tripName, tripCategory, imageBase64 } = body;
     
-    if (!firstName || !lastName || !phone || !tripId || !tripName || !tripCategory || !imageBase64) {
+    if (!firstName || !lastName || !phone || !email || !tripId || !tripName || !tripCategory || !imageBase64) {
       return NextResponse.json(
         { 
           success: false, 
-          message: 'Missing required fields: firstName, lastName, phone, tripId, tripName, tripCategory, and imageBase64 are required' 
+          message: 'Missing required fields: firstName, lastName, phone, email, tripId, tripName, tripCategory, and imageBase64 are required' 
         },
         { status: 400 }
       );

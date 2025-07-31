@@ -74,6 +74,14 @@ export default function BookingFormPage({ params }: PageProps) {
         }
       }
 
+      // Email validation
+      if (field.type === 'email' && value && typeof value === 'string') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value.trim())) {
+          newErrors[field.name] = 'Please enter a valid email address';
+        }
+      }
+
       // Additional validation for specific field types
       if (field.type === 'file' && field.required && !value) {
         newErrors[field.name] = `${field.label} is required`;
