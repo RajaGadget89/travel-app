@@ -7,6 +7,9 @@ export interface FormField {
   label: string;
   type: string;
   required: boolean;
+  options?: string[];
+  minDate?: string;
+  helperText?: string;
 }
 
 export interface FormData {
@@ -38,6 +41,257 @@ export default function TripFormFields({
     const error = errors[field.name];
 
     switch (field.type) {
+      case 'citizenId':
+        // Thai National ID validation algorithm
+        const validateThaiNationalID = (id: string): boolean => {
+          if (id.length !== 13) return false;
+          
+          // Check if all characters are digits
+          if (!/^\d{13}$/.test(id)) return false;
+          
+          // Thai National ID algorithm
+          let sum = 0;
+          for (let i = 0; i < 12; i++) {
+            sum += parseInt(id[i]) * (13 - i);
+          }
+          const checkDigit = (11 - (sum % 11)) % 10;
+          
+          return checkDigit === parseInt(id[12]);
+        };
+
+        // Format citizen ID for display (X-XXXX-XXXXX-XX-X)
+        const formatCitizenId = (digits: string): string => {
+          if (digits.length <= 1) return digits;
+          if (digits.length <= 5) return `${digits.slice(0, 1)}-${digits.slice(1)}`;
+          if (digits.length <= 10) return `${digits.slice(0, 1)}-${digits.slice(1, 5)}-${digits.slice(5)}`;
+          if (digits.length <= 12) return `${digits.slice(0, 1)}-${digits.slice(1, 5)}-${digits.slice(5, 10)}-${digits.slice(10)}`;
+          return `${digits.slice(0, 1)}-${digits.slice(1, 5)}-${digits.slice(5, 10)}-${digits.slice(10, 12)}-${digits.slice(12)}`;
+        };
+
+        // Handle citizen ID input change
+        const handleCitizenIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const input = e.target.value;
+          // Remove all non-digits and limit to 13 characters
+          const digits = input.replace(/\D/g, '').slice(0, 13);
+          
+          // Store raw digits in form data
+          onInputChange(field.name, digits);
+          
+          // Auto-focus next field when valid (optional)
+          if (digits.length === 13 && validateThaiNationalID(digits)) {
+            // Find next input field and focus it
+            const currentInput = e.target;
+            const form = currentInput.closest('form');
+            if (form) {
+              const inputs = Array.from(form.querySelectorAll('input, select, textarea'));
+              const currentIndex = inputs.indexOf(currentInput);
+              const nextInput = inputs[currentIndex + 1] as HTMLElement;
+              if (nextInput && nextInput.focus) {
+                setTimeout(() => nextInput.focus(), 100);
+              }
+            }
+          }
+        };
+
+        const citizenIdValue = typeof value === 'string' ? value : '';
+        const displayValue = formatCitizenId(citizenIdValue);
+        const isValidLength = citizenIdValue.length === 13;
+        const isValidFormat = /^\d{13}$/.test(citizenIdValue);
+        const isValidAlgorithm = isValidFormat && validateThaiNationalID(citizenIdValue);
+        
+        let helperText = '';
+        let isValid = false;
+        
+        if (citizenIdValue.length > 0) {
+          if (!isValidLength) {
+            helperText = 'เลขบัตรประชาชนต้องมี 13 หลัก';
+          } else if (!isValidFormat) {
+            helperText = 'เลขบัตรประชาชนต้องเป็นตัวเลขเท่านั้น';
+          } else if (!isValidAlgorithm) {
+            helperText = 'เลขบัตรประชาชนไม่ถูกต้อง';
+          } else {
+            helperText = '✓ เลขบัตรประชาชนถูกต้อง';
+            isValid = true;
+          }
+        }
+
+        return (
+          <div>
+            <input
+              type="text"
+              id={field.name}
+              name={field.name}
+              value={displayValue}
+              onChange={handleCitizenIdChange}
+              maxLength={17} // Account for dashes: 13 digits + 4 dashes
+              inputMode="numeric"
+              pattern="[0-9\-]*"
+              autoComplete="off"
+              aria-required={field.required}
+              aria-invalid={!!error}
+              aria-describedby={error ? `${field.name}-error` : helperText ? `${field.name}-helper` : undefined}
+              className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
+                error ? 'border-red-500' : isValid ? 'border-green-500' : citizenIdValue.length > 0 ? 'border-yellow-500' : 'border-gray-300'
+              }`}
+              placeholder="1-2345-67890-12-3"
+            />
+            {helperText && (
+              <p id={`${field.name}-helper`} className={`mt-1 text-sm ${
+                isValid ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {helperText}
+              </p>
+            )}
+          </div>
+        );
+
+      case 'date':
+        return (
+          <div>
+            <input
+              type="date"
+              id={field.name}
+              name={field.name}
+              value={typeof value === 'string' ? value : ''}
+              onChange={(e) => onInputChange(field.name, e.target.value)}
+              min={field.minDate}
+              aria-required={field.required}
+              aria-invalid={!!error}
+              aria-describedby={error ? `${field.name}-error` : field.helperText ? `${field.name}-helper` : undefined}
+              className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
+                error ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {field.helperText && (
+              <p id={`${field.name}-helper`} className="mt-1 text-sm text-gray-500">
+                {field.helperText}
+              </p>
+            )}
+          </div>
+        );
+
+      case 'passport':
+        // Handle passport input change with auto-uppercase
+        const handlePassportChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const input = e.target.value;
+          // Convert to uppercase and remove special characters/spaces
+          const cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, '');
+          // Limit to 15 characters
+          const limited = cleaned.slice(0, 15);
+          onInputChange(field.name, limited);
+        };
+
+        return (
+          <input
+            type="text"
+            id={field.name}
+            name={field.name}
+            value={typeof value === 'string' ? value : ''}
+            onChange={handlePassportChange}
+            minLength={6}
+            maxLength={15}
+            autoComplete="off"
+            aria-required={field.required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${field.name}-error` : undefined}
+            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
+              error ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="A12345678"
+            style={{ textTransform: 'uppercase' }}
+          />
+        );
+
+      case 'email':
+        // Handle email input change with English-only restriction
+        const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const input = e.target.value;
+          // Allow only English letters, numbers, and common email symbols
+          const englishOnly = input.replace(/[^a-zA-Z0-9@._-]/g, '');
+          onInputChange(field.name, englishOnly);
+        };
+
+        return (
+          <input
+            type="email"
+            id={field.name}
+            name={field.name}
+            value={typeof value === 'string' ? value : ''}
+            onChange={handleEmailChange}
+            autoComplete="email"
+            aria-required={field.required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${field.name}-error` : undefined}
+            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
+              error ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="example@email.com"
+            style={{ textTransform: 'lowercase' }}
+          />
+        );
+
+      case 'tel':
+        // Format phone number for display (XXX-XXX-XXXX)
+        const formatPhoneNumber = (value: string) => {
+          const digits = value.replace(/\D/g, '');
+          if (digits.length <= 3) return digits;
+          if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+          return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+        };
+
+        // Handle phone input change
+        const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const input = e.target.value;
+          const digits = input.replace(/\D/g, '');
+          
+          // Limit to 10 digits
+          if (digits.length <= 10) {
+            // Store as string to prevent Google Sheets from treating as number
+            // This ensures leading zeros are preserved when written to Google Sheets
+            onInputChange(field.name, digits);
+          }
+        };
+
+        return (
+          <input
+            type="tel"
+            id={field.name}
+            name={field.name}
+            value={formatPhoneNumber(typeof value === 'string' ? value : '')}
+            onChange={handlePhoneChange}
+            inputMode="numeric"
+            aria-required={field.required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${field.name}-error` : undefined}
+            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
+              error ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="081-234-5678"
+          />
+        );
+
+      case 'select':
+        return (
+          <select
+            id={field.name}
+            name={field.name}
+            value={typeof value === 'string' ? value : ''}
+            onChange={(e) => onInputChange(field.name, e.target.value)}
+            aria-required={field.required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${field.name}-error` : undefined}
+            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
+              error ? 'border-red-500' : 'border-gray-300'
+            }`}
+            required={field.required}
+          >
+            <option value="">-- กรุณาเลือก --</option>
+            {field.options?.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        );
+
       case 'textarea':
         return (
           <textarea
