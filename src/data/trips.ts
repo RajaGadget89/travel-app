@@ -18,7 +18,8 @@ export const trips = [
     formRequirements: [
       { name: "citizenId", label: "เลขบัตรประชาชน", required: true }
     ],
-    image: "satingphra-yinyang.png"
+    image: "satingphra-yinyang.png",
+    tripDate: "20/11/11"
   },
 
   {
@@ -38,7 +39,8 @@ export const trips = [
       { name: "passportExpiry", label: "วันหมดอายุพาสปอร์ต", required: true },
       { name: "roomType", label: "ประเภทห้องพัก", required: true }
     ],
-    image: "lipe-3d2n.png"
+    image: "lipe-3d2n.png",
+    tripDate: "18–20/11/2568"
   },
 
   {
@@ -56,7 +58,8 @@ export const trips = [
       { name: "passportNumber", label: "หมายเลขพาสปอร์ต", required: true },
       { name: "passportExpiry", label: "วันหมดอายุพาสปอร์ต", required: true }
     ],
-    image: "penang-2d1n.png"
+    image: "penang-2d1n.png",
+    tripDate: "19–20/11/2568"
   },
 
   {
@@ -75,7 +78,8 @@ export const trips = [
       { name: "passportNumber", label: "หมายเลขพาสปอร์ต", required: true },
       { name: "passportExpiry", label: "วันหมดอายุพาสปอร์ต", required: true }
     ],
-    image: "genting-penang-3d2n.png"
+    image: "genting-penang-3d2n.png",
+    tripDate: "18–20/11/2568"
   },
 
   {
@@ -95,7 +99,8 @@ export const trips = [
     formRequirements: [
       { name: "citizenId", label: "เลขบัตรประชาชน", required: true }
     ],
-    image: "songkhla-oldtown.png"
+    image: "songkhla-oldtown.png",
+    tripDate: "20/11/11"
   },
 
   {
@@ -115,7 +120,8 @@ export const trips = [
     ],
     formRequirements: [
       { name: "citizenId", label: "เลขบัตรประชาชน", required: true }
-    ]
+    ],
+    tripDate: "20,21/11/2568"
     // No image property - will use default fallback
   },
 
@@ -137,6 +143,7 @@ export const trips = [
     formRequirements: [
       { name: "citizenId", label: "เลขบัตรประชาชน", required: true }
     ],
-    image: "bigbelly-hatyai.png"
+    image: "bigbelly-hatyai.png",
+    tripDate: "21/11/11"
   }
 ];

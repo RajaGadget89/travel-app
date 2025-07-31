@@ -30,7 +30,8 @@ export default function HeroSection() {
       <div className="absolute inset-0 flex items-center justify-center z-35 px-4" style={{ transform: 'translateY(20%)', pointerEvents: 'none' }}>
         <button
           onClick={handleScroll}
-          className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-3 md:px-8 md:py-3 rounded-full shadow-lg transition-all text-sm md:text-lg transform hover:scale-105 active:scale-95 pointer-events-auto min-h-[44px] min-w-[120px] touch-manipulation"
+          className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-3 md:px-8 md:py-3 rounded-full shadow-lg transition-all text-sm md:text-lg transform hover:scale-105 active:scale-95 pointer-events-auto min-h-[44px] min-w-[120px] touch-manipulation focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2"
+          aria-label="View available travel packages and tours"
         >
           See Travel Packages
         </button>

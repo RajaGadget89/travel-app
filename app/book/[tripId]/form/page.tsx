@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { trips } from '../../../../src/data/trips';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import TripFormFields, { FormField, FormData, FormErrors } from '../../../components/TripFormFields';
 import { buildFormSchema, createInitialFormData } from '../../../../src/utils/formSchemaBuilder';
 
@@ -21,6 +22,7 @@ interface Trip {
     required: boolean;
   }>;
   image?: string;
+  tripDate: string;
 }
 
 interface PageProps {
@@ -40,6 +42,7 @@ export default function BookingFormPage({ params }: PageProps) {
   const [formSchema, setFormSchema] = useState<FormField[]>([]);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [imageBase64, setImageBase64] = useState<string>('');
+  const [paymentPreviewUrl, setPaymentPreviewUrl] = useState<string>('');
 
   // Get trip data and form schema
   const getTripData = useCallback(async () => {
@@ -53,7 +56,7 @@ export default function BookingFormPage({ params }: PageProps) {
     setTrip(tripData);
 
     // Build dynamic form schema based on trip requirements
-    const schema = buildFormSchema(tripData.formRequirements);
+    const schema = buildFormSchema(tripData.formRequirements, tripData.tripDate);
     setFormSchema(schema);
 
     // Initialize form data with empty values
@@ -78,7 +81,54 @@ export default function BookingFormPage({ params }: PageProps) {
       if (field.type === 'email' && value && typeof value === 'string') {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value.trim())) {
-          newErrors[field.name] = 'Please enter a valid email address';
+          newErrors[field.name] = 'รูปแบบอีเมลไม่ถูกต้อง';
+        }
+      }
+
+      // Thai phone validation - must start with 0, be exactly 10 digits, and be numeric only
+      if (field.type === 'tel' && value && typeof value === 'string') {
+        const digits = value.replace(/\D/g, '');
+        
+        if (!digits.startsWith('0')) {
+          newErrors[field.name] = 'Thai phone number must start with 0';
+        } else if (digits.length !== 10) {
+          newErrors[field.name] = 'Phone number must be exactly 10 digits';
+        } else if (!/^\d{10}$/.test(digits)) {
+          newErrors[field.name] = 'Phone number must contain only digits';
+        }
+      }
+
+      // Passport validation - 6-15 alphanumeric characters
+      if (field.type === 'passport' && value && typeof value === 'string') {
+        const passportRegex = /^[A-Z0-9]{6,15}$/i;
+        if (!passportRegex.test(value.trim())) {
+          newErrors[field.name] = 'กรุณากรอกหมายเลขพาสปอร์ตให้ถูกต้อง (6–15 ตัวอักษร/ตัวเลข)';
+        }
+      }
+
+      // Citizen ID validation - Thai National ID algorithm
+      if (field.type === 'citizenId' && value && typeof value === 'string') {
+        const citizenId = value.trim();
+        
+        // Check length
+        if (citizenId.length !== 13) {
+          newErrors[field.name] = 'เลขบัตรประชาชนต้องมี 13 หลัก';
+        }
+        // Check if all digits
+        else if (!/^\d{13}$/.test(citizenId)) {
+          newErrors[field.name] = 'เลขบัตรประชาชนต้องเป็นตัวเลขเท่านั้น';
+        }
+        // Check Thai National ID algorithm
+        else {
+          let sum = 0;
+          for (let i = 0; i < 12; i++) {
+            sum += parseInt(citizenId[i]) * (13 - i);
+          }
+          const checkDigit = (11 - (sum % 11)) % 10;
+          
+          if (checkDigit !== parseInt(citizenId[12])) {
+            newErrors[field.name] = 'เลขบัตรประชาชนไม่ถูกต้อง';
+          }
         }
       }
 
@@ -124,6 +174,15 @@ export default function BookingFormPage({ params }: PageProps) {
         return;
       }
 
+      // Create preview URL for paymentProof
+      if (fieldName === 'paymentProof') {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setPaymentPreviewUrl(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+
       // Convert image to base64
       const reader = new FileReader();
       reader.onload = () => {
@@ -138,6 +197,11 @@ export default function BookingFormPage({ params }: PageProps) {
     } else {
       // Clear base64 when no file is selected
       setImageBase64('');
+      
+      // Clear preview URL for paymentProof
+      if (fieldName === 'paymentProof') {
+        setPaymentPreviewUrl('');
+      }
     }
 
     setFormData(prev => ({ ...prev, [fieldName]: file }));
@@ -342,6 +406,21 @@ export default function BookingFormPage({ params }: PageProps) {
               onInputChange={handleInputChange}
               onFileChange={handleFileChange}
             />
+
+            {/* Payment Slip Preview */}
+            {paymentPreviewUrl && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-1">Preview สลิป:</p>
+                <Image
+                  src={paymentPreviewUrl}
+                  alt="Payment slip preview"
+                  width={400}
+                  height={240}
+                  className="max-h-60 rounded-md border border-gray-300"
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+            )}
 
             {/* Submit Status Messages */}
             {submitStatus === 'success' && (

@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       title,
       firstName,
       lastName,
-      phone,
+      phone: String(phone), // Ensure phone is sent as string to preserve leading zeros
       email: email || '',
       tripId,
       tripName,

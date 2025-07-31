@@ -73,7 +73,9 @@ export default function Footer() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 md:gap-8">
             {/* Language Selector */}
             <div className="space-y-3">
-              <h3 className="text-gray-500 text-sm font-normal">Language</h3>
+              <label htmlFor="language" className="text-gray-500 text-sm font-normal block">
+                Language
+              </label>
               <div className="relative">
                 <select 
                   id="language"
@@ -81,6 +83,7 @@ export default function Footer() {
                   value={selectedLanguage}
                   onChange={(e) => setSelectedLanguage(e.target.value)}
                   className="appearance-none bg-transparent border-b border-gray-300 text-black font-medium py-2 pr-8 focus:outline-none focus:border-blue-600 w-full"
+                  aria-label="Select language"
                 >
                   <option value="English">English</option>
                   <option value="ไทย">ไทย</option>
@@ -178,8 +181,12 @@ export default function Footer() {
 
       {/* Cookie/Accessibility Button */}
       <div className="fixed bottom-4 left-4">
-        <button className="w-12 h-12 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
-          <svg className="w-6 h-6 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
+        <button 
+          className="w-12 h-12 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Accessibility and cookie settings"
+          title="Accessibility and cookie settings"
+        >
+          <svg className="w-6 h-6 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
           </svg>
         </button>

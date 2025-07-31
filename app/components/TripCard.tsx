@@ -18,6 +18,7 @@ interface Trip {
     required: boolean;
   }>;
   image?: string;
+  tripDate: string;
 }
 
 interface TripCardProps {
@@ -85,7 +86,7 @@ export default function TripCard({ trip }: TripCardProps) {
           {/* Category Badge */}
           <div className="absolute top-3 left-3 md:top-4 md:left-4">
             <span className="inline-block bg-white/90 text-gray-900 px-2 py-1 md:px-3 md:py-1 rounded-full text-xs font-semibold">
-              {trip.category === 'OneDay' ? 'One Day' : 'Multi Day'}
+              {trip.tripDate}
             </span>
           </div>
 

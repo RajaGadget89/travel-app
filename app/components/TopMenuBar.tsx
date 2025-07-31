@@ -46,8 +46,10 @@ export default function TopMenuBar() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 rounded-md text-lg transition-colors duration-300 hover:bg-gray-100"
-          aria-label="Toggle mobile menu"
+          className="md:hidden p-2 rounded-md text-lg transition-colors duration-300 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label={mobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-menu"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {mobileMenuOpen ? (
@@ -66,16 +68,34 @@ export default function TopMenuBar() {
             <li><a href="#about" className="hover:text-blue-700">ABOUT</a></li>
           </ul>
           <div className={`flex items-center space-x-4 text-xl transition-colors duration-300 ${scrolled ? "text-black" : "text-white"}`}>
-            <button aria-label="Favorites" className="hover:text-blue-700"><span>♡</span></button>
-            <button aria-label="Search" className="hover:text-blue-700"><span>🔍</span></button>
-            <button aria-label="Language" className="hover:text-blue-700"><span>🌐</span></button>
+            <button 
+              aria-label="Add to favorites" 
+              className="hover:text-blue-700 transition-colors duration-200 p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="Add to favorites"
+            >
+              <span role="img" aria-hidden="true">♡</span>
+            </button>
+            <button 
+              aria-label="Search website content" 
+              className="hover:text-blue-700 transition-colors duration-200 p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="Search website content"
+            >
+              <span role="img" aria-hidden="true">🔍</span>
+            </button>
+            <button 
+              aria-label="Change language" 
+              className="hover:text-blue-700 transition-colors duration-200 p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="Change language"
+            >
+              <span role="img" aria-hidden="true">🌐</span>
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-200">
+        <div id="mobile-menu" className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-200" role="navigation" aria-label="Mobile navigation menu">
           <div className="px-4 py-6 space-y-4">
             <ul className="space-y-4 font-semibold text-lg text-black">
               <li><a href="#see-do" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>SEE & DO</a></li>
@@ -83,9 +103,27 @@ export default function TopMenuBar() {
               <li><a href="#about" className="block py-2 hover:text-blue-700" onClick={() => setMobileMenuOpen(false)}>ABOUT</a></li>
             </ul>
             <div className="flex items-center space-x-6 text-xl text-black pt-4 border-t border-gray-200">
-              <button aria-label="Favorites" className="p-2 hover:text-blue-700"><span>♡</span></button>
-              <button aria-label="Search" className="p-2 hover:text-blue-700"><span>🔍</span></button>
-              <button aria-label="Language" className="p-2 hover:text-blue-700"><span>🌐</span></button>
+              <button 
+                aria-label="Add to favorites" 
+                className="p-2 hover:text-blue-700 transition-colors duration-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                title="Add to favorites"
+              >
+                <span role="img" aria-hidden="true">♡</span>
+              </button>
+              <button 
+                aria-label="Search website content" 
+                className="p-2 hover:text-blue-700 transition-colors duration-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                title="Search website content"
+              >
+                <span role="img" aria-hidden="true">🔍</span>
+              </button>
+              <button 
+                aria-label="Change language" 
+                className="p-2 hover:text-blue-700 transition-colors duration-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                title="Change language"
+              >
+                <span role="img" aria-hidden="true">🌐</span>
+              </button>
             </div>
           </div>
         </div>
