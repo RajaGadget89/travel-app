@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare data for Google Apps Script webhook
+    // Include all dynamic fields from the request body while maintaining static fields
     const webhookData = {
       token: webhookToken,
       title,
@@ -51,7 +52,18 @@ export async function POST(request: NextRequest) {
       tripCategory,
       imageBase64,
       submittedAt: new Date().toISOString(),
+      // Include all dynamic fields from the request body
+      ...body,
+      // Ensure fields object is preserved for backward compatibility
+      fields: body.fields || {}
     };
+
+    // Debug: Log the webhook data being sent (excluding sensitive fields)
+    console.log('Webhook data being sent:', {
+      ...webhookData,
+      token: '[REDACTED]',
+      imageBase64: webhookData.imageBase64 ? '[PRESENT]' : '[MISSING]'
+    });
 
     // Forward request to Google Apps Script webhook
     const response = await fetch(webhookUrl, {

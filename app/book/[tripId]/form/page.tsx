@@ -154,7 +154,7 @@ export default function BookingFormPage({ params }: PageProps) {
     setSubmitStatus('idle');
 
     try {
-      // Extract all fields from form data with fallbacks
+      // Extract static fields from form data with fallbacks
       const title = formData.title || '';
       const firstName = formData.firstName || '';
       const lastName = formData.lastName || '';
@@ -163,15 +163,10 @@ export default function BookingFormPage({ params }: PageProps) {
       const extractedTripId = tripId || trip?.id || '';
       const tripName = trip?.name || '';
       const tripCategory = trip?.category || '';
-      const citizenId = formData.citizenId || '';
-      const passportNumber = formData.passportNumber || '';
-      const passportExpiry = formData.passportExpiry || '';
-      const roomType = formData.roomType || '';
-      const note = formData.note || formData.additionalNotes || '';
       const extractedImageBase64 = imageBase64;
 
-      // Debug: Log all field values to identify which ones are missing
-      console.log('Field values for validation:', {
+      // Debug: Log static field values for validation
+      console.log('Static field values for validation:', {
         title: title || 'EMPTY',
         firstName: firstName || 'EMPTY',
         lastName: lastName || 'EMPTY',
@@ -180,15 +175,10 @@ export default function BookingFormPage({ params }: PageProps) {
         extractedTripId: extractedTripId || 'EMPTY',
         tripName: tripName || 'EMPTY',
         tripCategory: tripCategory || 'EMPTY',
-        citizenId: citizenId || 'EMPTY',
-        passportNumber: passportNumber || 'EMPTY',
-        passportExpiry: passportExpiry || 'EMPTY',
-        roomType: roomType || 'EMPTY',
-        note: note || 'EMPTY',
         extractedImageBase64: extractedImageBase64 ? 'PRESENT' : 'EMPTY'
       });
 
-      // Validate required fields before submission - only consider truly missing values
+      // Validate required static fields before submission
       const missingFields = [];
       
       if (!firstName || (typeof firstName === 'string' && firstName.trim() === '')) {
@@ -217,7 +207,18 @@ export default function BookingFormPage({ params }: PageProps) {
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
 
-      // Construct the payload with all fields matching Google Sheet headers
+      // Dynamically extract all form fields from formSchema, excluding File objects
+      const dynamicFields = formSchema.reduce((acc, field) => {
+        const value = formData[field.name];
+        if (value instanceof File) return acc; // Skip file fields
+        acc[field.name] = typeof value === 'string' ? value : '';
+        return acc;
+      }, {} as Record<string, string>);
+
+      // Debug: Log dynamic fields
+      console.log('Dynamic fields extracted:', dynamicFields);
+
+      // Construct the payload with static fields and dynamic fields
       const payload = {
         title,
         firstName,
@@ -227,16 +228,12 @@ export default function BookingFormPage({ params }: PageProps) {
         tripId: extractedTripId,
         tripName,
         tripCategory,
-        citizenId,
-        passportNumber,
-        passportExpiry,
-        roomType,
-        note,
         imageBase64: extractedImageBase64,
-        fields: { ...formData }
+        ...dynamicFields, // Spread all dynamic fields
+        fields: { ...formData } // Keep backward compatibility
       };
 
-      // Remove File objects from fields
+      // Remove File objects from fields for backward compatibility
       Object.keys(payload.fields).forEach(key => {
         if (payload.fields[key] instanceof File) {
           delete payload.fields[key];
