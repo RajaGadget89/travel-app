@@ -6,6 +6,7 @@ const STANDARD_FIELDS: FormField[] = [
   { name: "firstName", label: "ชื่อ", type: "text", required: true },
   { name: "lastName", label: "นามสกุล", type: "text", required: true },
   { name: "phone", label: "เบอร์โทรศัพท์", type: "text", required: true },
+  { name: "email", label: "อีเมล", type: "email", required: true },
   { name: "note", label: "หมายเหตุเพิ่มเติม", type: "textarea", required: false },
   { name: "paymentProof", label: "แนบหลักฐานการชำระเงิน", type: "file", required: true }
 ];
