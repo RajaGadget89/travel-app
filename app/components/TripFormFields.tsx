@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 export interface FormField {
   name: string;
@@ -35,6 +35,122 @@ export default function TripFormFields({
   onInputChange,
   onFileChange
 }: TripFormFieldsProps) {
+  // Searchable Select Component
+  const SearchableSelect = ({ field, value, onChange }: { 
+    field: FormField; 
+    value: string; 
+    onChange: (value: string) => void; 
+  }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const filteredOptions = field.options?.filter(option =>
+      option.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+
+    const handleSelect = (option: string) => {
+      onChange(option);
+      setIsOpen(false);
+      setSearchTerm('');
+      setSelectedIndex(-1);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex(prev => 
+            prev < filteredOptions.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex(prev => 
+            prev > 0 ? prev - 1 : filteredOptions.length - 1
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (selectedIndex >= 0 && filteredOptions[selectedIndex]) {
+            handleSelect(filteredOptions[selectedIndex]);
+          }
+          break;
+        case 'Escape':
+          setIsOpen(false);
+          setSearchTerm('');
+          setSelectedIndex(-1);
+          break;
+      }
+    };
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+          setIsOpen(false);
+          setSearchTerm('');
+          setSelectedIndex(-1);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+      <div ref={containerRef} className="relative">
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="text"
+            value={isOpen ? searchTerm : value}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setIsOpen(true);
+              setSelectedIndex(-1);
+            }}
+            onFocus={() => {
+              setIsOpen(true);
+              setSearchTerm('');
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder="-- กรุณาเลือกจังหวัด --"
+            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
+              errors[field.name] ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+        
+        {isOpen && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((option, index) => (
+                <div
+                  key={option}
+                  className={`px-3 py-2 cursor-pointer hover:bg-blue-50 ${
+                    index === selectedIndex ? 'bg-blue-100' : ''
+                  } ${option === value ? 'bg-blue-50 font-medium' : ''}`}
+                  onClick={() => handleSelect(option)}
+                >
+                  {option}
+                </div>
+              ))
+            ) : (
+              <div className="px-3 py-2 text-gray-500">ไม่พบจังหวัดที่ค้นหา</div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Render form field based on type
   const renderField = (field: FormField) => {
     const value = formData[field.name];
@@ -324,6 +440,18 @@ export default function TripFormFields({
         );
 
       case 'select':
+        // Use searchable select for ccProvince field due to long list
+        if (field.name === 'ccProvince') {
+          return (
+            <SearchableSelect
+              field={field}
+              value={typeof value === 'string' ? value : ''}
+              onChange={(selectedValue) => onInputChange(field.name, selectedValue)}
+            />
+          );
+        }
+        
+        // Regular select for other fields
         return (
           <select
             id={field.name}

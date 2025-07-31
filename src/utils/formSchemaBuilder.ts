@@ -1,4 +1,5 @@
 import { FormField } from '../../app/components/TripFormFields';
+import { THAI_PROVINCES } from '../data/provinces';
 
 // Utility function to parse trip date and extract the last travel day
 function parseTripDate(tripDate: string): Date {
@@ -56,6 +57,13 @@ function calculateMinPassportExpiry(tripDate: string): { minDate: string; helper
 
 // Standard form fields that are always required
 const STANDARD_FIELDS: FormField[] = [
+  { 
+    name: "ccProvince", 
+    label: "สมาชิกหอการค้า / YEC จังหวัด?", 
+    type: "select", 
+    required: true,
+    options: THAI_PROVINCES
+  },
   { 
     name: "title", 
     label: "คำนำหน้า", 
