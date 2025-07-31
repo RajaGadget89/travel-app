@@ -105,6 +105,8 @@ export default function TripFormFields({
           <input
             ref={inputRef}
             type="text"
+            id={field.name}
+            name={field.name}
             value={isOpen ? searchTerm : value}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -117,6 +119,14 @@ export default function TripFormFields({
             }}
             onKeyDown={handleKeyDown}
             placeholder="-- กรุณาเลือกจังหวัด --"
+            autoComplete="off"
+            aria-required={field.required}
+            aria-invalid={!!errors[field.name]}
+            aria-describedby={errors[field.name] ? `${field.name}-error` : undefined}
+            aria-expanded={isOpen}
+            aria-haspopup="listbox"
+            aria-controls={`${field.name}-listbox`}
+            role="combobox"
             className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
               errors[field.name] ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -129,7 +139,12 @@ export default function TripFormFields({
         </div>
         
         {isOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+          <div 
+            id={`${field.name}-listbox`}
+            className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+            role="listbox"
+            aria-label={`${field.label} options`}
+          >
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option, index) => (
                 <div
@@ -138,12 +153,17 @@ export default function TripFormFields({
                     index === selectedIndex ? 'bg-blue-100' : ''
                   } ${option === value ? 'bg-blue-50 font-medium' : ''}`}
                   onClick={() => handleSelect(option)}
+                  role="option"
+                  aria-selected={option === value}
+                  id={`${field.name}-option-${index}`}
                 >
                   {option}
                 </div>
               ))
             ) : (
-              <div className="px-3 py-2 text-gray-500">ไม่พบจังหวัดที่ค้นหา</div>
+              <div className="px-3 py-2 text-gray-500" role="option" aria-disabled="true" aria-selected="false">
+                ไม่พบจังหวัดที่ค้นหา
+              </div>
             )}
           </div>
         )}
@@ -271,6 +291,7 @@ export default function TripFormFields({
               value={typeof value === 'string' ? value : ''}
               onChange={(e) => onInputChange(field.name, e.target.value)}
               min={field.minDate}
+              autoComplete="off"
               aria-required={field.required}
               aria-invalid={!!error}
               aria-describedby={error ? `${field.name}-error` : field.helperText ? `${field.name}-helper` : undefined}
@@ -465,6 +486,7 @@ export default function TripFormFields({
               error ? 'border-red-500' : 'border-gray-300'
             }`}
             required={field.required}
+            autoComplete={field.name === 'title' ? 'honorific-prefix' : undefined}
           >
             <option value="">-- กรุณาเลือก --</option>
             {field.options?.map((opt) => (
@@ -480,6 +502,7 @@ export default function TripFormFields({
             name={field.name}
             value={typeof value === 'string' ? value : ''}
             onChange={(e) => onInputChange(field.name, e.target.value)}
+            autoComplete="off"
             aria-required={field.required}
             aria-invalid={!!error}
             aria-describedby={error ? `${field.name}-error` : undefined}
@@ -492,44 +515,46 @@ export default function TripFormFields({
 
       case 'file':
         return (
-          <div 
-            className={`mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors cursor-pointer ${
-              error ? 'border-red-300 hover:border-red-400' : 'border-gray-300 hover:border-gray-400'
-            }`}
-            role="button"
-            tabIndex={0}
-            onClick={() => document.getElementById(field.name)?.click()}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                document.getElementById(field.name)?.click();
-              }
-            }}
-            aria-labelledby={`${field.name}-label`}
-            aria-describedby={error ? `${field.name}-error` : undefined}
-          >
-            <div className="space-y-1 text-center">
-              <svg
-                className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div className="flex flex-col sm:flex-row text-sm text-gray-600">
-                <span id={`${field.name}-label`} className="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
-                  Upload a file
-                </span>
-                <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>
+          <div>
+            <div 
+              className={`mt-1 flex justify-center px-4 md:px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors cursor-pointer ${
+                error ? 'border-red-300 hover:border-red-400' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              role="button"
+              tabIndex={0}
+              onClick={() => document.getElementById(field.name)?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  document.getElementById(field.name)?.click();
+                }
+              }}
+              aria-labelledby={`${field.name}-label`}
+              aria-describedby={error ? `${field.name}-error` : undefined}
+            >
+              <div className="space-y-1 text-center">
+                <svg
+                  className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-400"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="flex flex-col sm:flex-row text-sm text-gray-600">
+                  <span id={`${field.name}-label`} className="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2 py-1">
+                    Upload a file
+                  </span>
+                  <p className="pl-0 sm:pl-1 mt-1 sm:mt-0">or drag and drop</p>
+                </div>
+                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
               </div>
-              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
             </div>
             <input
               id={field.name}
@@ -541,11 +566,33 @@ export default function TripFormFields({
               aria-required={field.required}
               aria-invalid={!!error}
               aria-describedby={error ? `${field.name}-error` : undefined}
+              aria-label={`${field.label} file upload`}
             />
           </div>
         );
 
       default:
+        // Determine appropriate autocomplete attribute based on field name
+        const getAutoComplete = (fieldName: string) => {
+          switch (fieldName) {
+            case 'firstName':
+              return 'given-name';
+            case 'lastName':
+              return 'family-name';
+            case 'phone':
+            case 'phoneNumber':
+              return 'tel';
+            case 'email':
+              return 'email';
+            case 'citizenId':
+              return 'off';
+            case 'passportNumber':
+              return 'off';
+            default:
+              return undefined;
+          }
+        };
+
         return (
           <input
             type={field.type}
@@ -553,6 +600,7 @@ export default function TripFormFields({
             name={field.name}
             value={typeof value === 'string' ? value : ''}
             onChange={(e) => onInputChange(field.name, e.target.value)}
+            autoComplete={getAutoComplete(field.name)}
             aria-required={field.required}
             aria-invalid={!!error}
             aria-describedby={error ? `${field.name}-error` : undefined}
