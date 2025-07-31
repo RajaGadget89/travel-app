@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { trips } from '../../../../src/data/trips';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import TripFormFields, { FormField, FormData, FormErrors } from '../../../components/TripFormFields';
 import { buildFormSchema, createInitialFormData } from '../../../../src/utils/formSchemaBuilder';
 
@@ -84,11 +85,16 @@ export default function BookingFormPage({ params }: PageProps) {
         }
       }
 
-      // Phone validation - must be exactly 10 digits
+      // Thai phone validation - must start with 0, be exactly 10 digits, and be numeric only
       if (field.type === 'tel' && value && typeof value === 'string') {
         const digits = value.replace(/\D/g, '');
-        if (digits.length !== 10) {
+        
+        if (!digits.startsWith('0')) {
+          newErrors[field.name] = 'Thai phone number must start with 0';
+        } else if (digits.length !== 10) {
           newErrors[field.name] = 'Phone number must be exactly 10 digits';
+        } else if (!/^\d{10}$/.test(digits)) {
+          newErrors[field.name] = 'Phone number must contain only digits';
         }
       }
 
@@ -405,10 +411,13 @@ export default function BookingFormPage({ params }: PageProps) {
             {paymentPreviewUrl && (
               <div className="mt-4">
                 <p className="text-sm text-gray-600 mb-1">Preview สลิป:</p>
-                <img
+                <Image
                   src={paymentPreviewUrl}
                   alt="Payment slip preview"
+                  width={400}
+                  height={240}
                   className="max-h-60 rounded-md border border-gray-300"
+                  style={{ objectFit: 'contain' }}
                 />
               </div>
             )}

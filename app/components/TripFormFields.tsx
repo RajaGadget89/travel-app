@@ -231,9 +231,32 @@ export default function TripFormFields({
         );
 
       case 'tel':
+        // Thai phone number validation
+        const validateThaiPhoneNumber = (digits: string): { isValid: boolean; errorMessage: string } => {
+          if (digits.length === 0) {
+            return { isValid: false, errorMessage: '' };
+          }
+          
+          // Check if starts with '0'
+          if (!digits.startsWith('0')) {
+            return { isValid: false, errorMessage: 'เบอร์โทรศัพท์ไทยต้องขึ้นต้นด้วยเลข 0' };
+          }
+          
+          // Check if exactly 10 digits
+          if (digits.length !== 10) {
+            return { isValid: false, errorMessage: 'เบอร์โทรศัพท์ต้องมี 10 หลัก' };
+          }
+          
+          // Check if all characters are digits
+          if (!/^\d{10}$/.test(digits)) {
+            return { isValid: false, errorMessage: 'เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้น' };
+          }
+          
+          return { isValid: true, errorMessage: '' };
+        };
+
         // Format phone number for display (XXX-XXX-XXXX)
-        const formatPhoneNumber = (value: string) => {
-          const digits = value.replace(/\D/g, '');
+        const formatPhoneNumber = (digits: string): string => {
           if (digits.length <= 3) return digits;
           if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
           return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
@@ -242,32 +265,62 @@ export default function TripFormFields({
         // Handle phone input change
         const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           const input = e.target.value;
-          const digits = input.replace(/\D/g, '');
+          // Remove all non-digits and limit to 10 characters
+          const digits = input.replace(/\D/g, '').slice(0, 10);
           
-          // Limit to 10 digits
-          if (digits.length <= 10) {
-            // Store as string to prevent Google Sheets from treating as number
-            // This ensures leading zeros are preserved when written to Google Sheets
-            onInputChange(field.name, digits);
-          }
+          // Store raw digits in form data
+          onInputChange(field.name, digits);
         };
 
+        const phoneValue = typeof value === 'string' ? value : '';
+        const phoneDisplayValue = formatPhoneNumber(phoneValue);
+        const phoneValidation = validateThaiPhoneNumber(phoneValue);
+        
+        // Determine border color and helper text
+        let phoneBorderColor = 'border-gray-300';
+        let phoneHelperText = '';
+        let phoneHelperTextColor = 'text-gray-500';
+        
+        if (phoneValue.length > 0) {
+          if (phoneValidation.isValid) {
+            phoneBorderColor = 'border-green-500';
+            phoneHelperText = '✓ เบอร์โทรศัพท์ถูกต้อง';
+            phoneHelperTextColor = 'text-green-600';
+          } else if (phoneValue.length < 10) {
+            phoneBorderColor = 'border-yellow-500';
+            phoneHelperText = phoneValidation.errorMessage;
+            phoneHelperTextColor = 'text-yellow-600';
+          } else {
+            phoneBorderColor = 'border-red-500';
+            phoneHelperText = phoneValidation.errorMessage;
+            phoneHelperTextColor = 'text-red-600';
+          }
+        }
+
         return (
-          <input
-            type="tel"
-            id={field.name}
-            name={field.name}
-            value={formatPhoneNumber(typeof value === 'string' ? value : '')}
-            onChange={handlePhoneChange}
-            inputMode="numeric"
-            aria-required={field.required}
-            aria-invalid={!!error}
-            aria-describedby={error ? `${field.name}-error` : undefined}
-            className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${
-              error ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="081-234-5678"
-          />
+          <div>
+            <input
+              type="tel"
+              id={field.name}
+              name={field.name}
+              value={phoneDisplayValue}
+              onChange={handlePhoneChange}
+              inputMode="numeric"
+              pattern="[0-9\-]*"
+              autoComplete="tel"
+              aria-required={field.required}
+              aria-invalid={!!error}
+              aria-describedby={error ? `${field.name}-error` : phoneHelperText ? `${field.name}-helper` : undefined}
+              className={`w-full px-3 py-3 md:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${phoneBorderColor}`}
+              placeholder="081-234-5678"
+              maxLength={12} // Account for dashes: 10 digits + 2 dashes
+            />
+            {phoneHelperText && (
+              <p id={`${field.name}-helper`} className={`mt-1 text-sm ${phoneHelperTextColor}`}>
+                {phoneHelperText}
+              </p>
+            )}
+          </div>
         );
 
       case 'select':
